@@ -17,7 +17,7 @@ npm install
 npm run dev
 ```
 
-Then open http://localhost:5173. Click Try a sample on the first screen to see a full map.
+Then open http://localhost:5173. Click Sample map on the home screen to see a full map. The sample is a throwaway copy, so nothing you do there touches your own map. Open map takes you to your own map, which starts empty.
 
 `npm test` runs the core tests, `npm run typecheck` checks types, and `npm run build` writes static files to `dist/`.
 

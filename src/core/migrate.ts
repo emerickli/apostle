@@ -2,7 +2,7 @@
 // Each future version adds one step to `steps`. Old saves pass through every step in order.
 
 import {
-  BANDS, FILE_FORMAT, FILE_VERSION, LAYOUTS, POINT_KINDS, SOURCES, STANCES, emptyPower,
+  BANDS, FILE_FORMAT, FILE_VERSION, GENDERS, LAYOUTS, POINT_KINDS, SOURCES, STANCES, emptyPower,
   type Alliance, type Band, type Sphere, type CrossTie, type Goal, type ID, type Layout, type Person,
   type Point, type PowerSet, type Stance,
 } from './model';
@@ -80,6 +80,9 @@ function normalize(raw: Raw, now: string): Alliance {
       holdYou: str(p.holdYou),
       holdThem: str(p.holdThem),
       stances,
+      // Added after version 2. Missing in older saves, so they get the neutral default.
+      gender: oneOf(p.gender, GENDERS, 'other'),
+      photo: typeof p.photo === 'string' && p.photo.startsWith('data:image/') ? p.photo : null,
       updatedAt: str(p.updatedAt, now),
     };
   });

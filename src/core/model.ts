@@ -18,6 +18,10 @@ export const POINT_KINDS: readonly PointKind[] = ['time', 'interest', 'intro', '
 export type Stance = 'with' | 'against' | 'uncommitted';
 export const STANCES: readonly Stance[] = ['with', 'against', 'uncommitted'];
 
+/** Picks the default avatar. 'other' covers nonbinary and anyone who'd rather not say. */
+export type Gender = 'female' | 'male' | 'other';
+export const GENDERS: readonly Gender[] = ['female', 'male', 'other'];
+
 export type Layout = 'tree' | 'radial' | 'rings' | 'charts';
 export const LAYOUTS: readonly Layout[] = ['tree', 'radial', 'rings', 'charts'];
 
@@ -62,6 +66,9 @@ export interface Person {
   holdThem: string;
   /** Goal id to stance. A goal present here means the person is on that goal. */
   stances: Record<ID, Stance>;
+  gender: Gender;
+  /** A square photo as a data URL, or null to use the default avatar for their gender. */
+  photo: string | null;
   updatedAt: Timestamp;
 }
 

@@ -14,7 +14,10 @@ describe('sample alliance', () => {
   const name = (ids: string[]) => ids.map((id) => a.people.find((p) => p.id === id)!.name).sort();
 
   it('flags exactly the people the brief describes', () => {
-    expect(name(d.practice.cold)).toEqual(['Laila Okonkwo']);
+    expect(a.activeGoalId).toBeNull();
+    expect(d.practice.cold).toEqual([]);
+    const withRaise = derive({ ...a, activeGoalId: a.goals[0].id }, now);
+    expect(name(withRaise.practice.cold)).toEqual(['Laila Okonkwo']);
     expect(name(d.practice.exposed)).toEqual(['Jonah Peck']);
     expect(name(d.practice.unused)).toEqual(['Sofia Rahman']);
     expect(name(d.practice.bridge)).toEqual(['Chris Adelayo']);

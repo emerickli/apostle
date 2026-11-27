@@ -25,11 +25,11 @@ export function buildSample(now = new Date()): Alliance {
   const person = (p: Partial<Person> & Pick<Person, 'name'>): Person => ({
     id: newId(), company: '', title: '', url: '', connectedOn: null, sphereId: null, parentId: meId,
     points: [], closenessOverride: null, powerYou: emptyPower(), powerThem: emptyPower(),
-    holdYou: '', holdThem: '', stances: {}, updatedAt: stamp, ...p,
+    holdYou: '', holdThem: '', stances: {}, gender: 'other', photo: null, updatedAt: stamp, ...p,
   });
 
   const mira = person({
-    name: 'Mira Chen', company: 'Halcyon Ventures', title: 'Partner', sphereId: career.id,
+    name: 'Mira Chen', gender: 'female', company: 'Halcyon Ventures', title: 'Partner', sphereId: career.id,
     connectedOn: ago(820),
     points: [
       pt('time', 9, 'Breakfast before her partner meeting', true),
@@ -44,7 +44,7 @@ export function buildSample(now = new Date()): Alliance {
     stances: { [raise.id]: 'with' },
   });
   const andre = person({
-    name: 'Andre Walsh', company: 'Foundry Nine', title: 'Engineering lead', sphereId: workplace.id,
+    name: 'Andre Walsh', gender: 'male', company: 'Foundry Nine', title: 'Engineering lead', sphereId: workplace.id,
     connectedOn: ago(1400),
     points: [
       pt('time', 4, 'Late night on the launch build', true),
@@ -59,7 +59,7 @@ export function buildSample(now = new Date()): Alliance {
     stances: { [raise.id]: 'with' },
   });
   const laila = person({
-    name: 'Laila Okonkwo', company: 'Kestrel Partners', title: 'Operating partner', sphereId: career.id,
+    name: 'Laila Okonkwo', gender: 'female', company: 'Kestrel Partners', title: 'Operating partner', sphereId: career.id,
     connectedOn: ago(600),
     points: [
       pt('intro', 122, 'Introduced by Naomi', true),
@@ -72,7 +72,7 @@ export function buildSample(now = new Date()): Alliance {
     stances: { [raise.id]: 'uncommitted' },
   });
   const naomi = person({
-    name: 'Naomi Berg', company: 'Fieldstone', title: 'Advisor', sphereId: career.id,
+    name: 'Naomi Berg', gender: 'female', company: 'Fieldstone', title: 'Advisor', sphereId: career.id,
     connectedOn: ago(900),
     points: [
       pt('time', 24, 'Monthly advisor call', true),
@@ -83,21 +83,21 @@ export function buildSample(now = new Date()): Alliance {
     powerThem: pw({ access: 2, influence: 2 }),
   });
   const chris = person({
-    name: 'Chris Adelayo', company: 'The Ledger Wire', title: 'Reporter', sphereId: community.id,
+    name: 'Chris Adelayo', gender: 'other', company: 'The Ledger Wire', title: 'Reporter', sphereId: community.id,
     connectedOn: ago(500),
     points: [pt('interest', 410, 'Quoted me in a piece on hardware startups')],
     powerYou: pw({ access: 1 }),
     powerThem: pw({ influence: 1 }),
   });
   const jonah = person({
-    name: 'Jonah Peck', company: 'Halcyon Ventures', title: 'Managing director', sphereId: career.id,
+    name: 'Jonah Peck', gender: 'male', company: 'Halcyon Ventures', title: 'Managing director', sphereId: career.id,
     parentId: mira.id, connectedOn: ago(40),
     points: [pt('intro', 40, 'Mira brought him to the demo')],
     powerThem: pw({ money: 3, authority: 3, access: 3, alternatives: 2, standing: 2 }),
     holdThem: 'He can tell Mira to pass.',
   });
   const sofia = person({
-    name: 'Sofia Rahman', company: 'Foundry Nine', title: 'Product designer', sphereId: workplace.id,
+    name: 'Sofia Rahman', gender: 'female', company: 'Foundry Nine', title: 'Product designer', sphereId: workplace.id,
     parentId: andre.id, connectedOn: ago(300),
     points: [
       pt('time', 15, 'Design review'),
@@ -108,7 +108,7 @@ export function buildSample(now = new Date()): Alliance {
     holdYou: 'I wrote the reference that got her the visa.',
   });
   const ruth = person({
-    name: 'Ruth Ibarra', title: 'Angel investor', sphereId: career.id, parentId: naomi.id,
+    name: 'Ruth Ibarra', gender: 'female', title: 'Angel investor', sphereId: career.id, parentId: naomi.id,
     connectedOn: ago(260),
     points: [
       pt('time', 12, 'Lunch, she pushed hard on margins'),
@@ -120,7 +120,7 @@ export function buildSample(now = new Date()): Alliance {
     stances: { [raise.id]: 'against' },
   });
   const leo = person({
-    name: 'Leo Varga', title: 'Cousin', company: 'Varga Machine Works', sphereId: family.id,
+    name: 'Leo Varga', gender: 'male', title: 'Cousin', company: 'Varga Machine Works', sphereId: family.id,
     points: [
       pt('time', 3, 'Sunday dinner', true),
       pt('favor', 7, 'He fixed the prototype housing overnight', true),
@@ -134,7 +134,7 @@ export function buildSample(now = new Date()): Alliance {
     holdThem: 'He knows how much I put into the company.',
   });
   const nora = person({
-    name: 'Nora Ellis', title: 'Sister', company: 'City hospital', sphereId: family.id,
+    name: 'Nora Ellis', gender: 'female', title: 'Sister', company: 'City hospital', sphereId: family.id,
     points: [
       pt('time', 12, 'Her birthday dinner', true),
       pt('time', 25, 'Coffee after her shift', true),
@@ -145,7 +145,7 @@ export function buildSample(now = new Date()): Alliance {
     powerThem: pw({ bond: 1, debt: 1 }),
   });
   const priya = person({
-    name: 'Priya Nair', company: 'Northgate', title: 'Product lead', sphereId: friends.id,
+    name: 'Priya Nair', gender: 'female', company: 'Northgate', title: 'Product lead', sphereId: friends.id,
     connectedOn: ago(2200),
     points: [
       pt('time', 30, 'Run club', true),
@@ -155,14 +155,14 @@ export function buildSample(now = new Date()): Alliance {
     powerThem: pw({ access: 1, information: 1 }),
   });
   const tom = person({
-    name: 'Tom Brennan', company: 'Brennan & Ko', title: 'Lawyer', sphereId: friends.id, parentId: priya.id,
+    name: 'Tom Brennan', gender: 'male', company: 'Brennan & Ko', title: 'Lawyer', sphereId: friends.id, parentId: priya.id,
     connectedOn: ago(700),
     points: [pt('time', 200, 'Met at Priya\'s birthday')],
     powerYou: pw({ access: 1, information: 1, standing: 1 }),
     powerThem: pw({ expertise: 1 }),
   });
   const evan = person({
-    name: 'Evan Cho', parentId: null, url: 'https://linkedin.example/in/evan-cho',
+    name: 'Evan Cho', gender: 'other', parentId: null, url: 'https://linkedin.example/in/evan-cho',
   });
 
   return {
@@ -172,7 +172,8 @@ export function buildSample(now = new Date()): Alliance {
     people: [mira, andre, laila, jonah, sofia, chris, naomi, ruth, leo, nora, priya, tom, evan],
     spheres: [family, workplace, career, friends, community],
     goals: [raise],
-    activeGoalId: raise.id,
+    // Opens with no goal, so the map shows closeness. Raise is there to try.
+    activeGoalId: null,
     crossTies: [
       [mira, naomi], [jonah, ruth], [laila, naomi], [chris, mira], [priya, andre], [sofia, priya],
     ].map(([a, b]) => ({ id: newId(), a: a.id, b: b.id, updatedAt: stamp })),

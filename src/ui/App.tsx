@@ -14,6 +14,8 @@ import { downloadText, pickTextFile } from '../platform/browser';
 import { useAlliance, useStore } from './store-context';
 import { MapStage } from './MapStage';
 import { EmptyScreen } from './EmptyScreen';
+import { ImportScreen } from './ImportScreen';
+import type { Store } from '../core/store';
 import { TopBar } from './TopBar';
 import { PracticePanel } from './PracticePanel';
 import { PersonPanel } from './PersonPanel';
@@ -29,6 +31,8 @@ export type Highlight = { kind: 'practice'; key: PracticeKey };
 
 /** Line brightness by closeness. */
 const LINE_STRENGTH = { inner: 1, close: 0.8, active: 0.6, weak: 0.4 } as const;
+// With a goal on, anyone with a stance is relevant and stays bright.
+const NOT_INVOLVED = 0.2;
 
 function useNarrow() {
   const query = '(max-width: 760px)';
@@ -42,7 +46,17 @@ function useNarrow() {
   return narrow;
 }
 
-export function App() {
+/** Which map is showing (yours or the sample) and which screen. */
+export interface Where { map: 'mine' | 'sample'; screen: 'home' | 'map' | 'import' }
+
+interface Props {
+  where: Where;
+  go: (next: Where) => void;
+  /** Your own map. Opening a file or importing always lands here, even from the sample. */
+  mine: Store;
+}
+
+export function App({ where, go, mine }: Props) {
   const store = useStore();
   const alliance = useAlliance();
   const now = useMemo(() => new Date(), []);
@@ -58,13 +72,13 @@ export function App() {
   const [confirm, setConfirm] = useState<ConfirmSpec | null>(null);
   const [fitToken, setFitToken] = useState(0);
   const [spheresOpen, setSpheresOpen] = useState(false);
-  const [home, setHome] = useState(false);
   const viewRef = useRef<MapView | null>(null);
   const trayRef = useRef<HTMLDivElement>(null);
 
-  const empty = alliance.people.length === 0;
-  // The home screen shows when there is nobody yet, or when the wordmark is clicked.
-  const showHome = empty || home;
+  const isSample = where.map === 'sample';
+  // Home and Import draw no map behind them, just you at the center.
+  const showHome = where.screen !== 'map';
+  const setHome = (on: boolean) => go({ ...where, screen: on ? 'home' : 'map' });
   const say = useCallback((text: string) => setToast((t) => ({ text, n: (t?.n ?? 0) + 1 })), []);
   const nameOf = useCallback(
     (id: ID) => {
@@ -75,8 +89,9 @@ export function App() {
     [store],
   );
 
-  // Refit whenever the map appears or empties.
-  useEffect(() => setFitToken((n) => n + 1), [showHome]);
+  // Refit whenever the map appears, empties, or switches between yours and the sample.
+  useEffect(() => setFitToken((n) => n + 1), [where.screen, store]);
+  useEffect(() => { setSelectedId(null); setHighlight(null); setSpheresOpen(false); }, [store]);
 
   // Drop a selection or highlight that no longer points at anything.
   useEffect(() => {
@@ -109,11 +124,13 @@ export function App() {
   const scene = useMemo<Scene>(() => {
     const byId = new Map(alliance.people.map((p) => [p.id, p]));
     const spheres = new Map(alliance.spheres.map((c) => [c.id, c]));
+    // With no goal, brightness means closeness (line strength by band).
+    // With a goal, brightness means involved in it (any stance), and closeness steps aside.
+    const goalId = alliance.activeGoalId;
     const alphaOf = (id: ID) => {
       if (id === alliance.me.id || id === selectedId) return 1;
-      // Only an explicit highlight fades people. The active goal never does,
-      // so brightness always means closeness.
       if (highlightIds) return highlightIds.has(id) ? 1 : 0.14;
+      if (goalId) return byId.get(id)?.stances[goalId] ? 1 : NOT_INVOLVED;
       return 1;
     };
     const nodes = new Map<ID, SceneNode>();
@@ -141,7 +158,7 @@ export function App() {
         ...e,
         tone: cross ? 'even' : (bal?.tone ?? 'even'),
         hot: !cross && !!bal?.hot,
-        strength: LINE_STRENGTH[derived.bands.get(e.to) ?? 'weak'],
+        strength: goalId ? 1 : LINE_STRENGTH[derived.bands.get(e.to) ?? 'weak'],
         gap: Math.min(1, Math.abs(bal?.lead ?? 0) / 12),
         alpha: cross ? Math.min(alphaOf(e.from), alphaOf(e.to)) : alphaOf(e.to),
       };
@@ -223,40 +240,46 @@ export function App() {
       downloadText(name, JSON.stringify(store.getState(), null, 2));
       say(`Saved ${name}. Keep this file safe.`);
     },
+    // Opening a file always fills your own map, never the sample.
     open: async () => {
       const file = await pickTextFile('.json,application/json');
       if (!file) return;
       try {
         const next = readAlliance(JSON.parse(file.text));
-        const go = () => {
-          store.replace(next);
+        const load = () => {
+          mine.replace(next);
+          go({ map: 'mine', screen: 'map' });
           setSelectedId(null);
           setHighlight(null);
           setFitToken((n) => n + 1);
           say(`Opened ${file.name}. ${next.people.length} people.`);
         };
-        const count = store.getState().people.length;
-        if (count === 0) go();
+        const count = mine.getState().people.length;
+        if (count === 0) load();
         else
           setConfirm({
             title: 'Replace your map?',
             body: `Opening ${file.name} replaces the ${count} people on your map. Save to file first if you want to keep them.`,
             action: 'Open file',
-            onConfirm: go,
+            onConfirm: load,
           });
       } catch (err) {
         say(err instanceof AllianceFileError ? err.message : 'That file could not be read as an alliance.');
       }
     },
-    importConnections: async () => {
-      const file = await pickTextFile('.csv,text/csv');
-      if (!file) return;
+    importConnections: () => go({ map: 'mine', screen: 'import' }),
+    importFile: (file: { name: string; text: string }) => {
+      if (!/\.csv$/i.test(file.name)) {
+        say('That is not a CSV file. Look for Connections.csv in the LinkedIn download.');
+        return;
+      }
       try {
-        const s = store.importConnections(parseConnections(file.text));
+        const s = mine.importConnections(parseConnections(file.text));
         const skipped = [
           s.skippedDuplicate ? `${s.skippedDuplicate} already here` : '',
           s.skippedNoName ? `${s.skippedNoName} with no name` : '',
         ].filter(Boolean).join(' and ');
+        go({ map: 'mine', screen: 'map' });
         say(`Added ${s.added} ${s.added === 1 ? 'person' : 'people'}. They're in the bottom bar, ready to place.${skipped ? ` Skipped ${skipped}.` : ''}`);
         setFitToken((n) => n + 1);
       } catch (err) {
@@ -295,7 +318,10 @@ export function App() {
 
   const panelOpen = !!selectedId && !showHome;
   const charts = alliance.layout === 'charts';
-  const insets = showHome
+  const insets = where.screen === 'import'
+    // Lift you above the drop zone.
+    ? { left: 0, right: 0, top: 0, bottom: Math.round(window.innerHeight * 0.8) }
+    : showHome
     ? { left: 0, right: 0, top: 0, bottom: Math.round(window.innerHeight * 0.45) }
     : narrow
       ? { left: 0, right: 0, top: 110, bottom: panelOpen ? Math.round(window.innerHeight * 0.6) : 120 }
@@ -308,18 +334,19 @@ export function App() {
     <div className={`app ${showHome ? 'is-empty' : 'is-live'} ${panelOpen ? 'has-panel' : ''}`}>
       <MapStage scene={scene} fitToken={fitToken} insets={insets} callbacks={mapCallbacks} viewRef={viewRef} />
 
-      {showHome ? (
+      {where.screen === 'import' ? (
+        <ImportScreen onFile={files.importFile} onBack={() => go({ map: 'mine', screen: 'home' })} />
+      ) : showHome ? (
         <EmptyScreen
-          hasPeople={!empty}
-          onContinue={() => setHome(false)}
-          onAdd={addPerson}
-          onImport={() => { setHome(false); void files.importConnections(); }}
-          onSample={() => store.loadSample()}
-          onOpen={() => { setHome(false); void files.open(); }}
+          onOpenMap={() => go({ map: 'mine', screen: 'map' })}
+          onSample={() => go({ map: 'sample', screen: 'map' })}
+          onImport={files.importConnections}
+          onOpenFile={() => void files.open()}
         />
       ) : (
         <>
           <TopBar
+            sample={isSample}
             alliance={alliance}
             onAdd={addPerson}
             files={files}
@@ -349,6 +376,7 @@ export function App() {
             onPointerDown={startTrayDrag}
           />}
           {!charts && <Legend
+            goal={alliance.goals.find((g) => g.id === alliance.activeGoalId)?.name ?? null}
             onZoomIn={() => viewRef.current?.zoomBy(1.25)}
             onZoomOut={() => viewRef.current?.zoomBy(0.8)}
             onFit={() => viewRef.current?.fit()}

@@ -18,7 +18,7 @@ export interface StorageAdapter {
 }
 
 export type PersonPatch = Partial<
-  Pick<Person, 'name' | 'company' | 'title' | 'url' | 'connectedOn' | 'sphereId' | 'closenessOverride' | 'holdYou' | 'holdThem'>
+  Pick<Person, 'name' | 'company' | 'title' | 'url' | 'connectedOn' | 'sphereId' | 'closenessOverride' | 'holdYou' | 'holdThem' | 'gender' | 'photo'>
 >;
 
 export interface ImportSummary {
@@ -121,7 +121,7 @@ export function createStore(storage: StorageAdapter, clock: () => Date = () => n
       const person: Person = {
         id: newId(), name: '', company: '', title: '', url: '', connectedOn: null, sphereId: null,
         parentId: state.me.id, points: [], closenessOverride: null, powerYou: emptyPower(), powerThem: emptyPower(),
-        holdYou: '', holdThem: '', stances: {}, updatedAt: stamp(), ...init,
+        holdYou: '', holdThem: '', stances: {}, gender: 'other', photo: null, updatedAt: stamp(), ...init,
       };
       set({ ...state, people: [...state.people, person] });
       return person.id;
@@ -253,7 +253,8 @@ export function createStore(storage: StorageAdapter, clock: () => Date = () => n
         added.push({
           id: newId(), name: row.name.trim(), company: row.company, title: row.title, url: row.url,
           connectedOn: row.connectedOn, sphereId: null, parentId: null, points: [], closenessOverride: null,
-          powerYou: emptyPower(), powerThem: emptyPower(), holdYou: '', holdThem: '', stances: {}, updatedAt: stamp(),
+          powerYou: emptyPower(), powerThem: emptyPower(), holdYou: '', holdThem: '', stances: {},
+          gender: 'other', photo: null, updatedAt: stamp(),
         });
       }
       summary.added = added.length;

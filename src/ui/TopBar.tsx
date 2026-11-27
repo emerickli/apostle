@@ -7,6 +7,8 @@ import { LAYOUT_NAMES } from './words';
 import { FONT_SETS, applyFontSet, currentFontSet, sphereColor, theme, type FontSetId } from '../theme';
 
 interface Props {
+  /** The sample is a throwaway copy: label it and leave out the file actions that would replace it. */
+  sample: boolean;
   alliance: Alliance;
   onAdd: () => void;
   onHome: () => void;
@@ -76,7 +78,7 @@ function SphereBar({ alliance, onManage }: { alliance: Alliance; onManage: () =>
   );
 }
 
-export function TopBar({ alliance, onAdd, onHome, onManage, files }: Props) {
+export function TopBar({ sample, alliance, onAdd, onHome, onManage, files }: Props) {
   const [fontSet, setFontSet] = useState<FontSetId>(currentFontSet());
   const store = useStore();
   const activeGoal = alliance.goals.find((g) => g.id === alliance.activeGoalId);
@@ -87,6 +89,7 @@ export function TopBar({ alliance, onAdd, onHome, onManage, files }: Props) {
       <header className="topbar">
         <button className="brand" onClick={onHome} title="Home">
           <span className="wordmark">Apostle</span>
+          {sample && <span className="brand-tag">Sample</span>}
         </button>
 
         <nav className="tabs" aria-label="View">
@@ -121,7 +124,7 @@ export function TopBar({ alliance, onAdd, onHome, onManage, files }: Props) {
             {(close) => (
               <div className="pop-list">
                 <p className="pop-head">Focus on a goal</p>
-                <p className="pop-note">Sets the goal counts and who is going cold.</p>
+                <p className="pop-note">With a goal on, people involved in it stay bright and everyone else dims.</p>
                 <button className={`pop-row ${!activeGoal ? 'is-on' : ''}`} onClick={() => { store.setActiveGoal(null); close(); }}>
                   <span className="radio" /> No goal
                 </button>
@@ -176,8 +179,8 @@ export function TopBar({ alliance, onAdd, onHome, onManage, files }: Props) {
                 <button className="pop-row" onClick={() => { close(); files.download(); }}>Save to file</button>
                 <button className="pop-row" onClick={() => { close(); files.open(); }}>Open file</button>
                 <button className="pop-row" onClick={() => { close(); files.importConnections(); }}>Import LinkedIn connections</button>
-                <div className="pop-rule" />
-                <button className="pop-row pop-row-quiet" onClick={() => { close(); files.clear(); }}>Start over</button>
+                {!sample && <div className="pop-rule" />}
+                {!sample && <button className="pop-row pop-row-quiet" onClick={() => { close(); files.clear(); }}>Start over</button>}
               </div>
             )}
           </Menu>

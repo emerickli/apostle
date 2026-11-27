@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import {
-  BANDS, POINT_KINDS, SOURCES, STANCES,
+  BANDS, GENDERS, POINT_KINDS, SOURCES, STANCES,
   type Alliance, type Band, type ID, type Person, type PointKind, type Source, type Stance,
 } from '../core/model';
 import type { Derived } from '../core/derive';
@@ -8,7 +8,8 @@ import { computedBand, daysSince, lastPointDate, pointWeight } from '../core/rul
 import { descendantIds } from '../core/tree';
 import { thresholds } from '../core/thresholds';
 import { useStore } from './store-context';
-import { BAND_NAMES, POINT_NAMES, SOURCE_GROUPS, SOURCE_HINTS, SOURCE_NAMES, STANCE_NAMES, ago } from './words';
+import { BAND_NAMES, GENDER_NAMES, POINT_NAMES, SOURCE_GROUPS, SOURCE_HINTS, SOURCE_NAMES, STANCE_NAMES, ago } from './words';
+import { Avatar } from './Avatar';
 
 interface Props {
   person: Person;
@@ -191,14 +192,35 @@ export function PersonPanel({ person, alliance, derived, now, onClose, onPlace, 
           <button className="icon-btn push" onClick={onClose} aria-label="Close">×</button>
         </div>
 
-        <input
-          ref={nameRef}
-          className="field field-name"
-          value={person.name}
-          placeholder="Name"
-          aria-label="Name"
-          onChange={(e) => store.updatePerson(id, { name: e.target.value })}
-        />
+        <div className="person-id">
+          <div className="person-id-side">
+            <input
+              ref={nameRef}
+              className="field field-name"
+              value={person.name}
+              placeholder="Name"
+              aria-label="Name"
+              onChange={(e) => store.updatePerson(id, { name: e.target.value })}
+            />
+            <div className="seg-toggle seg-sm" role="radiogroup" aria-label="Gender">
+              {GENDERS.map((g) => (
+                <button
+                  key={g}
+                  role="radio"
+                  aria-checked={person.gender === g}
+                  className={person.gender === g ? 'is-on' : ''}
+                  onClick={() => store.updatePerson(id, { gender: g })}
+                >
+                  {GENDER_NAMES[g]}
+                </button>
+              ))}
+            </div>
+            {person.photo && (
+              <button className="link-btn quiet-link" onClick={() => store.updatePerson(id, { photo: null })}>Remove photo</button>
+            )}
+          </div>
+          <Avatar person={person} onError={onDeleted} />
+        </div>
         <div className="grid-2">
           <label className="lbl">
             <span>Title</span>

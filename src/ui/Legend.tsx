@@ -1,12 +1,13 @@
 import { useState } from 'react';
 
 interface Props {
+  goal: string | null;
   onZoomIn: () => void;
   onZoomOut: () => void;
   onFit: () => void;
 }
 
-export function Legend({ onZoomIn, onZoomOut, onFit }: Props) {
+export function Legend({ goal, onZoomIn, onZoomOut, onFit }: Props) {
   const [open, setOpen] = useState(false);
   return (
     <div className="legend-wrap">
@@ -18,7 +19,7 @@ export function Legend({ onZoomIn, onZoomOut, onFit }: Props) {
             <div><dt><i className="swatch swatch-even" /></dt><dd>Even</dd></div>
             <div><dt><i className="swatch swatch-hot" /></dt><dd>Thicker: bigger power gap</dd></div>
             <div><dt><i className="swatch swatch-cross" /></dt><dd>They know each other</dd></div>
-            <div><dt><i className="swatch-star" /></dt><dd>Brighter: closer tie</dd></div>
+            <div><dt><i className="swatch-star" /></dt><dd>{goal ? `Brighter: involved in ${goal}` : 'Brighter: closer tie'}</dd></div>
           </dl>
         </div>
       )}

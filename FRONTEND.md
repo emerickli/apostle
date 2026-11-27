@@ -38,11 +38,12 @@ Changes from the brief so far:
 | Left panel | Where you stand: stance counts on the active goal and how many ties you lead or trail on power. Needs attention lists each person with the reason and the next step. |
 | Wording | Plain and short: "Who knows who", "Leverage", "Not on the map", "Contact log". |
 | Look | Pure black, white text, saturated red and cyan, tight glows. Frosted glass panels with thin white lines. No scanlines, grid, corner marks, sweeps, pulses, glowing UI dots or colored tag outlines. Solid white for the active tab and main button. The key starts closed. |
-| Home | Clicking the Apostle wordmark returns to the home screen, which offers Open map. Clicking your own point opens your card. |
+| Home | Clicking the Apostle wordmark returns to the home screen. It offers Open map (your own map, empty until you add someone), Sample map (a fresh throwaway copy each visit, marked Sample under the wordmark), Import LinkedIn, and Open a saved file. Clicking your own point opens your card. |
+| Import | Import LinkedIn opens its own page: a drop zone for Connections.csv, a Choose file button, and one line on where LinkedIn keeps the export. Imported people land in your own map's bottom bar, never in the sample. |
 | Type | An Aa menu switches between Tektur with Kode Mono (default), Chakra Petch with JetBrains Mono, Oxanium with Share Tech Mono, and Saira with Martian Mono. The choice is saved on this computer. |
 | Spheres to start | New and cleared maps start with Family, Workplace, Career and Friends. |
 
-The sample loads with Raise as the active goal.
+The sample loads with no active goal. Raise is there to switch on.
 
 ## Mood (not negotiable)
 
@@ -112,6 +113,7 @@ Pan and zoom the map.
 ## A person
 
 - Name
+- Picture, square, to the right of the name on grey frosted glass. Until a photo is added it shows a default avatar picked by gender: Female, Male, or Other/NA. Hovering shows Add photo; clicking or dropping an image sets one, cropped to a square. Remove photo goes back to the default
 - Company, title, profile URL, connected date
 - Sphere, from a short editable list
 - Closeness, computed from the log, with a way to override it and a way to clear the override
@@ -163,7 +165,7 @@ Keep every number in this section and the hot-link threshold in one place, so th
 
 ## Goals
 
-A goal has a name. People on that goal have a stance. One goal can be active at a time. The active goal drives the stance counts and Going cold. It does not dim anyone on the map, because brightness means closeness.
+A goal has a name. People on that goal have a stance. One goal can be active at a time. The active goal drives the stance counts and Going cold. It also changes what brightness means on the map. With no goal, brightness means closeness. With a goal on, brightness means relevance: anyone with a stance (with you, undecided or against you) is full strength, and anyone not involved dims. Closeness still sets node size. The key says which meaning is in use.
 
 ## Import, open, save
 
@@ -177,9 +179,9 @@ The file has a version number. It holds you, people, spheres, goals, the active 
 
 ## Sample alliance
 
-Load this from the empty screen so the map is reviewable without a real network. Keep the names fictional. Include a quiet way to clear it and return to the empty screen.
+Load this from Sample map on the home screen so the map is reviewable without a real network. Keep the names fictional. The sample lives in memory apart from your own map, so trying it never overwrites your work, and each visit starts it fresh.
 
-The active goal on load is **Raise**. Set sample dates relative to the day it is loaded, so the flags do not change as time passes.
+The sample loads with no active goal. With **Raise** switched on, the flags below apply; with no goal, nobody is going cold. Set sample dates relative to the day it is loaded, so the flags do not change as time passes.
 
 | Person | Parent | Sphere | Band | Power | On Raise | Should be flagged |
 |---|---|---|---|---|---|---|

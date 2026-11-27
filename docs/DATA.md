@@ -29,7 +29,7 @@ Actions on the whole alliance are `replace`, `loadSample` and `clear`. `clear` k
 
 For you, there is `renameMe`.
 
-For people: `addPerson(init?)` returns the new id and places the person under you unless `init.parentId` says otherwise. `updatePerson(id, patch)` changes name, company, title, URL, connected date, sphere, override and the two leverage lines (`holdYou`, `holdThem`). `setOverride(id, band | null)` and `setPower(id, 'you' | 'them', source, 0..3)` do what they say. `deletePerson(id)` moves the deleted person's direct children up to its parent and drops its cross-ties. `movePerson(id, parentId | null)` returns `{ ok }` or `{ ok: false, reason }` with `reason` one of `self`, `cycle`, `root`, `missing`. A null parent sends the person to the tray, and the people under them go with them.
+For people: `addPerson(init?)` returns the new id and places the person under you unless `init.parentId` says otherwise. `updatePerson(id, patch)` changes name, company, title, URL, connected date, sphere, override and the two leverage lines (`holdYou`, `holdThem`), gender and photo. `setOverride(id, band | null)` and `setPower(id, 'you' | 'them', source, 0..3)` do what they say. `deletePerson(id)` moves the deleted person's direct children up to its parent and drops its cross-ties. `movePerson(id, parentId | null)` returns `{ ok }` or `{ ok: false, reason }` with `reason` one of `self`, `cycle`, `root`, `missing`. A null parent sends the person to the tray, and the people under them go with them.
 
 Points: `addPoint`, `updatePoint`, `removePoint`.
 
@@ -75,3 +75,4 @@ To change the shape, raise `FILE_VERSION` in `model.ts` and add a step to `steps
 3. Validation in `readAlliance` beyond filling defaults, for example parent chains that point at missing people.
 4. `chartStats` in `src/core/stats.ts` scans every point for each sphere. Fine for hundreds of people; index by month if it slows.
 5. Tests: `npm test` runs the starter tests in `src/core/__tests__/`.
+6. Photos. `Person.photo` holds a 320px square JPEG as a data URL (about 25 KB each), and `Person.gender` ('female' | 'male' | 'other') picks the default avatar. Both were added without a version bump: `readAlliance` fills `gender: 'other'` and `photo: null` for older saves. Browser storage tops out near 5 MB, so a few hundred photos will hit the quota. In the desktop app, move photos to files beside the save and keep only a path here.
