@@ -6,6 +6,14 @@ A private map of your professional circle. You sit at the root. The tree shows w
 
 For one person: a founder, operator, organizer, or career-builder. One network for life. Circles and goals are filters on that network.
 
+## How to read this plan
+
+**The aesthetic and theme are not negotiable.** Everything else, including numbers, features, and structure, is a starting suggestion. Change it when the build shows something better, and update this file when you do.
+
+Apostle starts as a static site and is meant to become mainly a desktop app. Build so that the move does not require a rewrite. A phone app may follow.
+
+The first goal is a bare interface, running on the sample alliance, that can be played with. Real LinkedIn data waits.
+
 ## The tree
 
 Home is a tree rooted at you. You place people. A weak tie with real power can sit near the top.
@@ -19,7 +27,7 @@ Same record, four layouts. New accounts open on the rooted tree. You can change 
 - **Rings.** Closeness only: inner, close, active, weak.
 - **Graph.** Cross-ties on, for finding a path.
 
-## Aesthetic
+## Aesthetic (not negotiable)
 
 Cosmic, cyber, neon against black. The field is space: near-black, mostly empty. Neon is the only light. Points like stars, lines like signals, a few of them hotter than the rest. A constellation and a command screen at the same time.
 
@@ -70,7 +78,7 @@ A real account and sync can wait for the app. Until then there is no server data
 
 You download your data from LinkedIn and import that file. Apostle does not connect to LinkedIn and does not scrape it.
 
-The connections export gives a name, a profile URL, and the date you connected. From December 20, 2026 it no longer includes email, company, or title. Those stay fields you fill in.
+Import relies only on a name, a profile URL, and the date you connected. The export is expected to stop including email, company, and title from December 20, 2026 (not yet verified with LinkedIn). Treat those as optional, and let the user fill them in.
 
 Import adds people. It does not invent power, closeness, or where they sit on the tree. You place them after.
 
@@ -100,16 +108,44 @@ A static site in this look.
 - Add, edit, delete, and place people
 - Rooted tree, plus the other layouts and the cross-tie switch
 - Closeness log, power sources, private hold, goal filters
-- The list above
+- The practice list: cold, exposed, unused, bridge
 - Browser save, file download, and file open
 - LinkedIn connections import
+- Only the motion the interface needs to feel clear and alive
+
+## Who builds what
+
+- **Claude: the front end.** The look, screens, map layouts, interactions, and the sample alliance. This includes a simple working version of the data module, so the interface runs from the start.
+- **Cursor: the code-heavy work.** Hardening that module: browser storage, the save file, version migrations, the LinkedIn parser, edge cases, and tests. It also picks up gaps left after the front-end pass.
+
+The data module's interface is the line between the two. The front end reads and changes the network only through it. Changes to that interface should be written down so both sides stay in step.
+
+## Stack direction
+
+The technical choice is left to the builder. This is the starting direction.
+
+- A TypeScript web app, built to static files. The same code goes into a desktop shell later.
+- 3D rendering is under consideration, likely with Three.js (WebGL). It has to keep power colors, names, and tree structure readable, including in the flat-reading layouts. Keep layout math separate from drawing, so the renderer can change.
+- The desktop shell does not need to be chosen yet. Tauri is smaller and uses the system's web view, which differs between operating systems. Electron is larger and ships the same Chromium everywhere. Test the 3D map in the shell before committing to one.
+
+## Building toward an app
+
+These are choices to make now so the app is cheaper later. None of them means building the app now.
+
+- Keep the data model and rules (closeness, power, practice list, tree moves) in plain code with no dependence on the page or the browser.
+- Put storage behind an asynchronous interface. Browser storage is the first version of it. App storage or sync can replace it.
+- Give every record a stable unique ID and a last-changed time, so sync stays possible.
+- Support touch. Nothing should depend only on hover, a right click, or a keyboard.
+- Give every drag action a second way to do it, such as a "Move under" control in the person panel.
+- Keep colors, type, spacing, and motion values in one theme file, so an app can carry the same look.
 
 ## Later
 
+- Desktop app
 - Phone app
 - Private sync across devices
 - Agents that summarize and organize what you already wrote
-- Motion
+- Richer motion
 
 ## Front-end brief
 

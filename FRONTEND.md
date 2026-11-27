@@ -6,9 +6,13 @@ A private map of one person's professional circle. You are the root. The screen 
 
 This pass is the interface. It should work on a sample alliance before any real save file or LinkedIn account exists. Keep all network state behind one module so a later pass can harden browser storage, the save file, and the LinkedIn parser without redrawing the screen.
 
-You choose the stack, the type, the motion, and the exact colors. The mood and the behavior below are the constraint.
+You choose the stack, the type, the motion, and the exact colors.
 
-## Mood
+**The mood below is not negotiable.** The rest of this brief is a starting suggestion. Improve on it where the build shows something better, and update this file when you do.
+
+Apostle is meant to become an app. Follow "Building toward an app" and "Who builds what" in [PLAN.md](PLAN.md).
+
+## Mood (not negotiable)
 
 Cosmic, cyber, neon against black.
 
@@ -27,6 +31,14 @@ Meaning inside the neon:
 - Red is only for your power. Other neon hues can mark circles.
 - The private hold is neon writing on black, and it never appears on the map.
 - Say the color meanings in words somewhere small, so color is not the only signal.
+
+### Reference images
+
+Reference images live in `reference photos/` on the owner's computer. Git ignores that folder. Treat them as a mood board for feel, not as a design to copy.
+
+### Depth
+
+3D rendering is welcome where it serves the mood, such as depth in the field and the map. Readability comes first. See "Stack direction" in [PLAN.md](PLAN.md).
 
 ## Screens
 
@@ -54,7 +66,12 @@ One record, four drawings. A new session opens on the rooted tree. Remember the 
 - **Rings.** Ignore rank. Place people in bands by closeness: inner, close, active, weak. You at the center.
 - **Graph.** Parent lines plus cross-ties, for finding a path.
 
-You place people. Drag a node onto another to make it a child. Refuse a drag that would create a cycle. You cannot be dragged or deleted.
+You place people. Drag a node onto another to make it a child. Drag it onto you to place it directly under you. Refuse a drag that would create a cycle. You cannot be dragged or deleted. The person panel offers the same moves without dragging.
+
+- **Unplaced** means a person's chain of parents does not reach you. They appear in the tray.
+- **Move to tray:** drag a person there. Their `parentId` becomes null. The people under them go with them and keep their structure.
+- **Placing from the tray:** the person brings the people under them. The tray shows that group under its top person.
+- **Delete:** the people directly under the deleted person move up to that person's parent. If the deleted person had no parent, those people have none either and stay in the tray. Nobody else is ever deleted.
 
 Cross-ties are extra links between people who know each other. Draw them dim. The control is off until it is turned on.
 
@@ -82,47 +99,69 @@ Accent "power you hold" in red and "power they hold" in cyan.
 
 ### Closeness
 
-Computed, unless overridden. An empty log is weak. Points, recency, and mutual effort raise it. Cap it. The override replaces the computed value. The node gets brighter and larger as closeness rises. You stay the brightest.
+Computed, unless overridden. The override replaces the computed value. The node gets brighter and larger as closeness rises. You stay the brightest.
+
+Starting formula:
+
+- Each logged point is worth 1. A mutual point is worth 1.5 times as much.
+- Multiply by recency: 1 if it is 90 days old or newer, 0.5 if up to 365 days, 0.25 if older.
+- Add the points and cap the total at 10.
+
+| Band | Score |
+|---|---|
+| Inner | 7 or more |
+| Close | 4.5 to under 7 |
+| Active | 2 to under 4.5 |
+| Weak | under 2, including an empty log |
+
+An override picks a band.
 
 ### Practice list
 
-Computed. Clicking a row highlights those people.
+Computed. Clicking a row highlights those people. A person can appear under more than one heading.
 
-- **Cold.** On the active goal, and the last point is older than 90 days, or there is none.
-- **Exposed.** Their power sum is higher, and the tie is not close.
-- **Unused.** Your power sum leads by a clear margin.
-- **Bridge.** The tie is weak, and their circle has almost nobody else in it.
+- **Cold.** On the active goal, and the last point is more than 90 days old, or there is none. With no active goal, nobody is cold.
+- **Exposed.** Their power sum is higher by any amount, and the band is active or weak.
+- **Unused.** Your power sum leads by 4 or more. Apostle does not track whether you have used it, so the screen should not claim to know.
+- **Bridge.** The band is weak, they have a circle, and they are the only person in it.
 
-These thresholds are starting points.
+Keep every number in this section and the hot-link threshold in one place, so they are easy to tune.
 
 ## Goals
 
-A goal has a name. People on that goal have a stance. One goal can be active at a time. People outside it dim.
+A goal has a name. People on that goal have a stance. One goal can be active at a time. While one is active, people outside it dim.
 
 ## Import, open, save
 
-The buttons exist in this pass. The durable versions can be replaced later.
+The buttons work in this pass in a simple form. Cursor hardens them later, behind the same data module.
 
 - **Download alliance** writes the network to a file.
 - **Open alliance** reads that file back.
 - **Import connections** reads a LinkedIn connections file the user downloaded. Take name, profile URL, and the date connected. Email, company, and title may be missing. Skip a row with no name. Skip a profile URL you already have. Do not invent power, closeness, a parent, or a circle. New people land in the unplaced tray.
 
-The file has a version number. It holds you, people, circles, goals, cross-ties, the layout, and whether cross-ties are showing. `parentId` null means unplaced. You are not in the people list.
+The file has a version number. It holds you, people, circles, goals, the active goal, cross-ties, the layout, and whether cross-ties are showing. Every record has a stable unique ID and a last-changed time. You have your own ID and are not in the people list. A person directly under you uses your ID as their `parentId`. A null `parentId` means they have no parent.
 
 ## Sample alliance
 
 Load this from the empty screen so the map is reviewable without a real network. Keep the names fictional. Include a quiet way to clear it and return to the empty screen.
 
-- **You**, root.
-- **Mira Chen**, under you, investors, close, recent, they hold more. On the goal Raise, with you. Cross-tie to Naomi.
-- **Andre Walsh**, under you, team, close, you hold more. With you.
-- **Laila Okonkwo**, under you, on Raise, uncommitted, no recent point. She reads as cold.
-- **Jonah Peck**, under Mira, weak, they hold much more, you hold nothing. He reads as exposed.
-- **Sofia Rahman**, under Andre, your power leads by a wide margin. She reads as unused.
-- **Chris Adelayo**, under you, weak, the only person in press. He reads as a bridge.
-- **Naomi Berg**, under you, cross-tie to Mira.
-- **Ruth Ibarra**, under Naomi, on Raise, against you.
-- **Evan Cho**, unplaced, name and profile URL only, as if just imported.
+The active goal on load is **Raise**. Set sample dates relative to the day it is loaded, so the flags do not change as time passes.
+
+| Person | Parent | Circle | Band | Power | On Raise | Should be flagged |
+|---|---|---|---|---|---|---|
+| Mira Chen | You | Investors | Close, recent | They lead | With you | None |
+| Andre Walsh | You | Team | Close, recent | You lead by under 4 | With you | None |
+| Laila Okonkwo | You | Advisors | Active, last point over 90 days old | Even | Uncommitted | Cold |
+| Jonah Peck | Mira | Investors | Weak | They lead by 6 or more; you have 0 | No | Exposed |
+| Sofia Rahman | Andre | Team | Active | You lead by 6 or more | No | Unused |
+| Chris Adelayo | You | Press (only member) | Weak | Even | No | Bridge |
+| Naomi Berg | You | Advisors | Active | Even | No | None |
+| Ruth Ibarra | Naomi | Investors | Active, recent | Even | Against you | None |
+| Evan Cho | Unplaced | None | Weak (empty log) | Even, all 0 | No | None |
+
+You are the root. Mira and Naomi have a cross-tie. Evan has only a name and profile URL, as if just imported.
+
+An older point counts for less, so Laila's log needs enough points to stay Active.
 
 ## Leave out
 
