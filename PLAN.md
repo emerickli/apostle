@@ -21,21 +21,11 @@ Same record, four layouts. New accounts open on the rooted tree. You can change 
 
 ## Aesthetic
 
-Cosmic and cyberpunk. Near-black space, not a gray app theme. Neon is the only light.
+Cosmic, cyber, neon against black. The field is space: near-black, mostly empty. Neon is the only light. Points like stars, lines like signals, a few of them hotter than the rest. A constellation and a command screen at the same time.
 
-The first screen is mostly empty black. **Apostle** sits large on the left in heavy type. The motto sits under it. The tree occupies the right, like a constellation.
+Claude chooses the layout, type, motion, and exact colors. The mood is the constraint. The screen is not a gray app and not a dashboard.
 
-- You are the brightest node, a white-hot point.
-- Other nodes are small neon stars. A circle is amber, violet, green, or magenta.
-- A stronger tie is brighter and larger.
-- Most edges are hairlines. A few ties burn hotter.
-- Power on the edge: cyan when they hold more, red when you hold more, white when it is even.
-- Red is only for your power. It is not a circle color.
-- Notes and the private hold are neon writing on black.
-- Names and numbers inside the product are monospaced. Labels are tight.
-- The first version is still. A slow drift can come later.
-
-Mood reference is the dark frame you shared. We take the black field, the neon points, the few hot edges, and the empty space. We do not take that name, the brain outline, or their line.
+Power stays readable in that neon: cyan when they hold more, red when you hold more, white when it is even. Red is only for your power.
 
 ## A tie
 
@@ -123,7 +113,7 @@ A static site in this look.
 
 ## Front-end brief
 
-The interface instructions for Claude are in [FRONTEND.md](FRONTEND.md). That pass is the look, the tree, the panels, and the sample alliance. Saving, the LinkedIn parse, and file migrations stay behind one data module so a later coding pass can harden them without redrawing the screen.
+The front-end brief is in [FRONTEND.md](FRONTEND.md). It covers the map, the person, the practice list, and the sample. Claude decides type, motion, and exact colors inside the mood. Saving, the LinkedIn parse, and file migrations stay behind one data module.
 
 ## Not now
 
