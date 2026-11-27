@@ -97,3 +97,17 @@ describe('sphere visibility', () => {
     expect(back.people.find((p) => p.name === 'Leo Varga')!.sphereId).toBe(back.spheres.find((x) => x.name === 'Family')!.id);
   });
 });
+
+describe('save format version 2', () => {
+  it('adds a Family sphere once to older saves, and respects deleting it later', () => {
+    const old = JSON.parse(JSON.stringify(buildSample(now)));
+    old.version = 1;
+    old.spheres = old.spheres.filter((s: { name: string }) => s.name !== 'Family');
+    const up = readAlliance(old, now);
+    expect(up.version).toBe(2);
+    expect(up.spheres.filter((s) => s.name === 'Family')).toHaveLength(1);
+
+    const removed = { ...up, spheres: up.spheres.filter((s) => s.name !== 'Family') };
+    expect(readAlliance(JSON.parse(JSON.stringify(removed)), now).spheres.some((s) => s.name === 'Family')).toBe(false);
+  });
+});

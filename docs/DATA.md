@@ -60,6 +60,8 @@ The file is the alliance object as JSON, with `format: "apostle-alliance"` and `
 
 Early saves used `circles` and `circleId`. `readAlliance` still accepts those names.
 
+Version 2 adds a Family sphere to any version 1 save that has none. It runs once, so a Family sphere deleted later stays deleted.
+
 The fourth layout is `charts`. Saves that say `graph` open as `charts`.
 
 To change the shape, raise `FILE_VERSION` in `model.ts` and add a step to `steps` in `migrate.ts` that upgrades the previous version. Files from a newer version are refused with a message rather than read badly.

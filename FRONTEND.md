@@ -23,7 +23,8 @@ Run it with `npm install` and `npm run dev`. The data module's interface is in [
 | Depth | Three layers of stars that drift at different rates when you pan. |
 | Type | Four bundled pairings, switchable from the Aa menu (see below). All work offline. |
 | Theme | Every color, size and timing is in `src/theme.ts`. |
-| Motion | Layout changes glide and new people rise out of their parent. A few stars twinkle. Reduced-motion settings turn these off. |
+| Motion | Layout changes glide and new people rise out of their parent. The stars drift very slowly, nearer ones a little faster, and a faint shooting star crosses every 10 to 20 seconds. Reduced-motion settings turn these off. |
+| Points | People are diamonds and you are a hexagon. Inner and close ties get an outline of the same shape. |
 
 Design cues taken from the reference images: soft halos on small points, thin colored signal lines, condensed uppercase labels, thin frames with cut corners, and segmented meters with red on one side and cyan on the other for power.
 

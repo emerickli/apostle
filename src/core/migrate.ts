@@ -12,8 +12,6 @@ export class AllianceFileError extends Error {}
 
 type Raw = Record<string, unknown>;
 
-// version -> function that upgrades a raw object from that version to the next.
-const steps: Record<number, (raw: Raw) => Raw> = {};
 
 const str = (v: unknown, fallback = ''): string => (typeof v === 'string' ? v : fallback);
 const strOrNull = (v: unknown): string | null => (typeof v === 'string' && v ? v : null);
@@ -32,6 +30,20 @@ function power(v: unknown): PowerSet {
   }
   return out;
 }
+
+// version -> function that upgrades a raw object from that version to the next.
+const steps: Record<number, (raw: Raw) => Raw> = {
+  // Version 2: every map has a Family sphere. Added once, so deleting it later sticks.
+  1: (raw) => {
+    const list = arr(raw.spheres ?? raw.circles);
+    if (list.some((s) => str(s.name).trim().toLowerCase() === 'family')) return raw;
+    const used = new Set(list.map((s) => s.color));
+    let color = 0;
+    while (used.has(color)) color++;
+    const family = { id: newId(), name: 'Family', color, updatedAt: new Date().toISOString() };
+    return { ...raw, spheres: [family, ...list], circles: undefined };
+  },
+};
 
 function normalize(raw: Raw, now: string): Alliance {
   const meRaw = (raw.me && typeof raw.me === 'object' ? raw.me : {}) as Raw;

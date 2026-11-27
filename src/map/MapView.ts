@@ -80,6 +80,8 @@ export class MapView {
   private glowCache = new Map<string, HTMLCanvasElement>();
   private reduced = window.matchMedia('(prefers-reduced-motion: reduce)');
   private hoverId: ID | null = null;
+  private meteor: { x: number; y: number; vx: number; vy: number; start: number; life: number } | null = null;
+  private nextMeteor = 6000;
   private pointers = new Map<number, { x: number; y: number }>();
   private gesture:
     | { kind: 'none' }
@@ -490,24 +492,24 @@ export class MapView {
       if (!n) continue;
       const s = this.toScreen(p);
       const { r } = this.nodeSize(n.band);
+      // You are a hexagon; everyone else is a diamond.
+      const sides = n.band === 'me' ? 6 : 4;
+      const size = n.band === 'me' ? r * 1.15 : r * 1.3;
       ctx.globalAlpha = n.alpha;
-      ctx.beginPath();
       ctx.fillStyle = n.color;
-      ctx.arc(s.x, s.y, r, 0, Math.PI * 2);
+      this.shape(s.x, s.y, size, sides);
       ctx.fill();
       if (n.band !== 'weak') {
-        ctx.beginPath();
         ctx.fillStyle = '#ffffff';
         ctx.globalAlpha = n.alpha * (n.band === 'me' ? 1 : 0.85);
-        ctx.arc(s.x, s.y, r * 0.5, 0, Math.PI * 2);
+        this.shape(s.x, s.y, size * 0.45, sides);
         ctx.fill();
       }
       if (n.band === 'inner' || n.band === 'close') {
-        ctx.beginPath();
         ctx.strokeStyle = n.color;
         ctx.lineWidth = 1;
-        ctx.globalAlpha = n.alpha * (n.band === 'inner' ? 0.75 : 0.5);
-        ctx.arc(s.x, s.y, r + 4, 0, Math.PI * 2);
+        ctx.globalAlpha = n.alpha * (n.band === 'inner' ? 0.85 : 0.55);
+        this.shape(s.x, s.y, size + 5, sides);
         ctx.stroke();
       }
       if (n.band === 'me') this.drawOrbit(s);
@@ -594,9 +596,13 @@ export class MapView {
 
   private drawSpace(t: number, still: boolean) {
     const ctx = this.ctx;
+    // A very slow drift, nearer layers a little faster, so the field feels alive.
+    const drift = still ? 0 : t / 1000;
     for (const layer of this.layers) {
-      const ox = (((-this.cam.x * this.cam.k * layer.depth) % TILE) + TILE) % TILE;
-      const oy = (((-this.cam.y * this.cam.k * layer.depth) % TILE) + TILE) % TILE;
+      const dx = drift * layer.depth * 55;
+      const dy = drift * layer.depth * 14;
+      const ox = (((-this.cam.x * this.cam.k * layer.depth - dx) % TILE) + TILE) % TILE;
+      const oy = (((-this.cam.y * this.cam.k * layer.depth + dy) % TILE) + TILE) % TILE;
       for (const s of layer.stars) {
         const tw = s.tw && !still ? 0.55 + 0.45 * Math.sin(t / 1000 * s.tw + s.ph) : 1;
         ctx.globalAlpha = s.a * tw;
@@ -613,6 +619,51 @@ export class MapView {
       }
     }
     ctx.globalAlpha = 1;
+    if (!still) this.drawMeteor(t);
+  }
+
+  /** Now and then, a faint shooting star crosses the field. */
+  private drawMeteor(t: number) {
+    if (!this.meteor) {
+      if (t < this.nextMeteor) return;
+      const fromLeft = Math.random() < 0.5;
+      const speed = 0.9 + Math.random() * 0.5;
+      this.meteor = {
+        x: fromLeft ? Math.random() * this.w * 0.5 : this.w * (0.5 + Math.random() * 0.5),
+        y: Math.random() * this.h * 0.4,
+        vx: (fromLeft ? 1 : -1) * speed,
+        vy: speed * 0.45,
+        start: t,
+        life: 900,
+      };
+    }
+    const m = this.meteor;
+    const age = t - m.start;
+    if (age > m.life) {
+      this.meteor = null;
+      this.nextMeteor = t + 10000 + Math.random() * 10000;
+      return;
+    }
+    const u = age / m.life;
+    const hx = m.x + m.vx * age;
+    const hy = m.y + m.vy * age;
+    const tail = 140;
+    const len = Math.hypot(m.vx, m.vy);
+    const tx = hx - (m.vx / len) * tail;
+    const ty = hy - (m.vy / len) * tail;
+    const ctx = this.ctx;
+    const g = ctx.createLinearGradient(hx, hy, tx, ty);
+    const a = Math.sin(u * Math.PI) * 0.5;
+    g.addColorStop(0, `rgba(255, 255, 255, ${a})`);
+    g.addColorStop(1, 'rgba(255, 255, 255, 0)');
+    ctx.save();
+    ctx.strokeStyle = g;
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.moveTo(hx, hy);
+    ctx.lineTo(tx, ty);
+    ctx.stroke();
+    ctx.restore();
   }
 
   private tracePath(a: Vec, b: Vec, curved: boolean) {
@@ -661,19 +712,28 @@ export class MapView {
     ctx.globalAlpha = 1;
   }
 
+  /** A regular polygon path with a point at the top. */
+  private shape(x: number, y: number, r: number, sides: number) {
+    const ctx = this.ctx;
+    ctx.beginPath();
+    for (let i = 0; i < sides; i++) {
+      const a = -Math.PI / 2 + (i * Math.PI * 2) / sides;
+      const px = x + Math.cos(a) * r;
+      const py = y + Math.sin(a) * r;
+      if (i === 0) ctx.moveTo(px, py);
+      else ctx.lineTo(px, py);
+    }
+    ctx.closePath();
+  }
+
+  /** A thin hexagon around you. */
   private drawOrbit(s: Vec) {
     const ctx = this.ctx;
-    const r = 20 * clamp(Math.sqrt(this.cam.k), 0.6, 1.4);
-    const rot = 0;
     ctx.save();
-    ctx.strokeStyle = 'rgba(235, 242, 255, 0.35)';
+    ctx.strokeStyle = 'rgba(255, 255, 255, 0.45)';
     ctx.lineWidth = 1;
-    for (let i = 0; i < 4; i++) {
-      const a0 = rot + (i * Math.PI) / 2 + 0.25;
-      ctx.beginPath();
-      ctx.arc(s.x, s.y, r, a0, a0 + 0.9);
-      ctx.stroke();
-    }
+    this.shape(s.x, s.y, 20 * clamp(Math.sqrt(this.cam.k), 0.6, 1.4), 6);
+    ctx.stroke();
     ctx.restore();
   }
 

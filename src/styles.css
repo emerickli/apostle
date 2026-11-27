@@ -519,7 +519,7 @@ button.pop-row:hover { background: rgba(238, 243, 255, 0.05); }
 .swatch-even { border-color: rgba(238, 243, 255, 0.5); }
 .swatch-hot { border-top-width: 3px; border-color: var(--me); }
 .swatch-cross { border-top: 1px dashed rgba(238, 243, 255, 0.6); }
-.swatch-star { display: block; width: 7px; height: 7px; border-radius: 50%; background: var(--me); }
+.swatch-star { display: block; width: 7px; height: 7px; background: var(--me); transform: rotate(45deg); }
 .zoom { display: flex; gap: 4px; }
 
 /* Messages */

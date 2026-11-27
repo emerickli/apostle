@@ -1,7 +1,7 @@
 // The shape of an alliance. Plain data, safe to serialize, no browser types.
 
 export const FILE_FORMAT = 'apostle-alliance';
-export const FILE_VERSION = 1;
+export const FILE_VERSION = 2;
 
 export type ID = string;
 /** Calendar date, YYYY-MM-DD. */
