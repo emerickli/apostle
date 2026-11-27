@@ -4,11 +4,13 @@
 
 A private map of your professional circle. You sit at the root. The tree shows where people stand. Each tie shows how close it is and who holds power.
 
-For one person: a founder, operator, organizer, or career-builder. One network for life. Circles and goals are filters on that network.
+For one person: a founder, operator, organizer, or career-builder. One network for life. Spheres (such as Family, Workplace, Career, Friends, Community) and goals are filters on that network. Turn spheres on and off; with all of them on you see everyone.
 
 ## How to read this plan
 
 **The aesthetic and theme are not negotiable.** Everything else, including numbers, features, and structure, is a starting suggestion. Change it when the build shows something better, and update this file when you do.
+
+Keep the words plain. Someone tired after a long day should be able to sit down, see where they stand, and know what to do next. Cut any word that is there to sound cool.
 
 Apostle starts as a static site and is meant to become mainly a desktop app. Build so that the move does not require a rewrite. A phone app may follow.
 
@@ -25,13 +27,17 @@ Same record, four layouts. New accounts open on the rooted tree. You can change 
 - **Rooted tree.** You at the top. Default.
 - **Radial tree.** You at the center, branches out.
 - **Rings.** Closeness only: inner, close, active, weak.
-- **Graph.** Cross-ties on, for finding a path.
+- **Charts.** Simple charts, one at a time: who has the upper hand (pie), power (bars), closeness (histogram), contacts per month (line), or a table. Each can be shown per sphere or for everyone.
 
 ## Aesthetic (not negotiable)
 
 Cosmic, cyber, neon against black. The field is space: near-black, mostly empty. Neon is the only light. Points like stars, lines like signals, a few of them hotter than the rest. A constellation and a command screen at the same time.
 
 Claude chooses the layout, type, motion, and exact colors. The mood is the constraint. The screen is not a gray app and not a dashboard.
+
+Harsh and sharp, with high contrast: pure black, white text, saturated red and cyan, tight glows, no soft color clouds. Keep effects few: no sweeps, pulses or scanlines.
+
+Keep the interface stripped down. Panels are frosted glass: a thin line over a blur of the stars, never an opaque or tinted fill. No decorative glowing dots or colored outlines on tags; a sphere's color shows as a short flat bar. The glow belongs to the map's points and lines.
 
 Power stays readable in that neon: cyan when they hold more, red when you hold more, white when it is even. Red is only for your power.
 
@@ -50,7 +56,7 @@ Power stays readable in that neon: cyan when they hold more, red when you hold m
 
 A number, if shown, is only the sum of those sources.
 
-**The hold** is one optional private line each way: what you can use, and what they can use. It stays off the tree.
+**Leverage** is one optional private line each way: what you can use, and what they can use. It stays off the map.
 
 **Stance**, when you filter by a goal: with you, against you, or uncommitted.
 
@@ -59,7 +65,7 @@ A number, if shown, is only the sum of those sources.
 - Ties going cold on a goal you care about
 - Where they hold more power than the closeness can carry
 - Where you hold power you have not used
-- Weak ties that bridge a circle you are outside
+- Weak ties that are your only link to a sphere
 
 ## Saving your network
 
@@ -107,8 +113,8 @@ A static site in this look.
 
 - Add, edit, delete, and place people
 - Rooted tree, plus the other layouts and the cross-tie switch
-- Closeness log, power sources, private hold, goal filters
-- The practice list: cold, exposed, unused, bridge
+- Closeness log, power sources, private leverage notes, goal focus, sphere filters
+- Where you stand: counts for the goal, power and closeness, plus a list of who needs attention and why
 - Browser save, file download, and file open
 - LinkedIn connections import
 - Only the motion the interface needs to feel clear and alive
@@ -124,8 +130,8 @@ The data module's interface is the line between the two. The front end reads and
 
 The technical choice is left to the builder. This is the starting direction.
 
-- A TypeScript web app, built to static files. The same code goes into a desktop shell later.
-- 3D rendering is under consideration, likely with Three.js (WebGL). It has to keep power colors, names, and tree structure readable, including in the flat-reading layouts. Keep layout math separate from drawing, so the renderer can change.
+- A TypeScript web app, built to static files with Vite. The panels use React. The same code goes into a desktop shell later.
+- The first pass draws the map in 2D on a canvas, with a parallax starfield for depth. Layout math lives in `src/map/layout.ts`, apart from drawing, so a 3D renderer (likely Three.js) can replace `src/map/MapView.ts` later. Any 3D version has to keep power colors, names, and tree structure readable.
 - The desktop shell does not need to be chosen yet. Tauri is smaller and uses the system's web view, which differs between operating systems. Electron is larger and ships the same Chromium everywhere. Test the 3D map in the shell before committing to one.
 
 ## Building toward an app

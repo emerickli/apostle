@@ -1,2 +1,5 @@
 reference photos/
 .DS_Store
+node_modules/
+dist/
+*.local
