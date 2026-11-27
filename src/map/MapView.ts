@@ -678,38 +678,46 @@ export class MapView {
 
   private drawEdge(e: SceneEdge, a: Vec, b: Vec, curved: boolean) {
     const ctx = this.ctx;
-    if (e.kind === 'cross') {
+    // Each line is a soft wide glow, added like light, under a crisp core.
+    const glow = (color: string, width: number, alpha: number, dashed = false) => {
       ctx.save();
-      ctx.setLineDash([2, 6]);
-      ctx.strokeStyle = theme.color.even;
-      ctx.globalAlpha = 0.24 * e.alpha;
-      ctx.lineWidth = 1;
-      this.tracePath(a, b, false);
+      ctx.globalCompositeOperation = 'lighter';
+      if (dashed) ctx.setLineDash([2, 6]);
+      ctx.strokeStyle = color;
+      ctx.globalAlpha = alpha * e.alpha;
+      ctx.lineWidth = width;
+      this.tracePath(a, b, curved && e.kind !== 'cross');
       ctx.stroke();
       ctx.restore();
+    };
+    const core = (color: string, width: number, alpha: number, dashed = false) => {
+      ctx.save();
+      if (dashed) ctx.setLineDash([2, 6]);
+      ctx.strokeStyle = color;
+      ctx.globalAlpha = alpha * e.alpha;
+      ctx.lineWidth = width;
+      this.tracePath(a, b, curved && e.kind !== 'cross');
+      ctx.stroke();
+      ctx.restore();
+    };
+    if (e.kind === 'cross') {
+      glow(theme.color.even, 3, 0.08, true);
+      core(theme.color.even, 1, 0.4, true);
       return;
     }
     const color = TONE_COLOR[e.tone];
-    const spoke = e.kind === 'spoke';
-    const base = e.tone === 'even' ? 0.32 : 0.8;
+    const spoke = e.kind === 'spoke' ? 0.8 : 1;
     if (e.hot) {
-      ctx.strokeStyle = color;
-      ctx.globalAlpha = 0.16 * e.alpha;
-      ctx.lineWidth = 8;
-      this.tracePath(a, b, curved);
-      ctx.stroke();
-      ctx.globalAlpha = e.alpha;
-      ctx.lineWidth = 2.2;
-      this.tracePath(a, b, curved);
-      ctx.stroke();
+      glow(color, 11, 0.2 * spoke);
+      glow(color, 5, 0.3 * spoke);
+      core(color, 2.4, spoke);
+    } else if (e.tone === 'even') {
+      glow(color, 6, 0.1 * spoke);
+      core(color, 1.4, 0.62 * spoke);
     } else {
-      ctx.strokeStyle = color;
-      ctx.globalAlpha = base * (spoke ? 0.7 : 1) * e.alpha;
-      ctx.lineWidth = 1;
-      this.tracePath(a, b, curved);
-      ctx.stroke();
+      glow(color, 6, 0.16 * spoke);
+      core(color, 1.3, 0.85 * spoke);
     }
-    ctx.globalAlpha = 1;
   }
 
   /** A regular polygon path with a point at the top. */
@@ -744,6 +752,10 @@ export class MapView {
     const showAll = k >= 0.5;
     ctx.save();
     ctx.textBaseline = below ? 'top' : 'middle';
+    // A black outline keeps names readable where lines pass behind them.
+    ctx.strokeStyle = '#000';
+    ctx.lineWidth = 4;
+    ctx.lineJoin = 'round';
     for (const [id, p] of this.shown) {
       const n = scene.nodes.get(id);
       if (!n) continue;
@@ -762,13 +774,16 @@ export class MapView {
       if (isMe) {
         ctx.textAlign = 'center';
         ctx.textBaseline = 'bottom';
+        ctx.strokeText(text, s.x, s.y - 26 * clamp(Math.sqrt(k), 0.6, 1.4));
         ctx.fillText(text, s.x, s.y - 26 * clamp(Math.sqrt(k), 0.6, 1.4));
         ctx.textBaseline = below ? 'top' : 'middle';
       } else if (below) {
         ctx.textAlign = 'center';
+        ctx.strokeText(text, s.x, s.y + r + (id === scene.selectedId ? 34 : 9));
         ctx.fillText(text, s.x, s.y + r + (id === scene.selectedId ? 34 : 9));
       } else {
         ctx.textAlign = 'left';
+        ctx.strokeText(text, s.x + r + (id === scene.selectedId ? 36 : 9), s.y);
         ctx.fillText(text, s.x + r + (id === scene.selectedId ? 36 : 9), s.y);
       }
     }
