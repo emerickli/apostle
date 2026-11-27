@@ -27,6 +27,9 @@ import { REFUSALS } from './words';
 
 export type Highlight = { kind: 'practice'; key: PracticeKey };
 
+/** Line brightness by closeness. */
+const LINE_STRENGTH = { inner: 1, close: 0.8, active: 0.6, weak: 0.4 } as const;
+
 function useNarrow() {
   const query = '(max-width: 760px)';
   const [narrow, setNarrow] = useState(() => window.matchMedia(query).matches);
@@ -138,6 +141,8 @@ export function App() {
         ...e,
         tone: cross ? 'even' : (bal?.tone ?? 'even'),
         hot: !cross && !!bal?.hot,
+        strength: LINE_STRENGTH[derived.bands.get(e.to) ?? 'weak'],
+        gap: Math.min(1, Math.abs(bal?.lead ?? 0) / 12),
         alpha: cross ? Math.min(alphaOf(e.from), alphaOf(e.to)) : alphaOf(e.to),
       };
     });

@@ -58,7 +58,7 @@ Meaning inside the neon:
 
 - You are the brightest point.
 - A stronger tie is brighter and larger.
-- Most links are thin. A wide power gap burns hotter.
+- Each line has one meaning per property: color is who holds more power, brightness is closeness (inner brightest, weak faintest), thickness is the size of the power gap. A gap of 6 or more also gets an extra glow.
 - Cyan means they hold more. Red means you hold more. White means even.
 - Red is only for your power. Other neon hues mark spheres.
 - Leverage notes are neon writing on black, and they never appear on the map.

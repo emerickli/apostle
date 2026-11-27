@@ -23,6 +23,10 @@ export interface SceneEdge {
   kind: 'parent' | 'spoke' | 'cross';
   tone: Tone;
   hot: boolean;
+  /** How close the tie is, 0.4 for weak up to 1 for inner. Sets brightness. */
+  strength: number;
+  /** Size of the power gap, 0 to 1. Sets thickness. */
+  gap: number;
   alpha: number;
 }
 export interface Scene {
@@ -705,19 +709,14 @@ export class MapView {
       core(theme.color.even, 1, 0.4, true);
       return;
     }
+    // Color says who holds more power, brightness says how close the tie is,
+    // thickness says how big the power gap is.
     const color = TONE_COLOR[e.tone];
-    const spoke = e.kind === 'spoke' ? 0.8 : 1;
-    if (e.hot) {
-      glow(color, 11, 0.2 * spoke);
-      glow(color, 5, 0.3 * spoke);
-      core(color, 2.4, spoke);
-    } else if (e.tone === 'even') {
-      glow(color, 6, 0.1 * spoke);
-      core(color, 1.4, 0.62 * spoke);
-    } else {
-      glow(color, 6, 0.16 * spoke);
-      core(color, 1.3, 0.85 * spoke);
-    }
+    const bright = e.strength * (e.tone === 'even' ? 0.8 : 1);
+    const width = 1.1 + e.gap * 1.6;
+    glow(color, width + 5, 0.16 * bright);
+    if (e.hot) glow(color, width + 9, 0.14 * bright);
+    core(color, width, bright);
   }
 
   /** A regular polygon path with a point at the top. */

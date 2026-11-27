@@ -16,9 +16,9 @@ export function Legend({ onZoomIn, onZoomOut, onFit }: Props) {
             <div><dt><i className="swatch swatch-them" /></dt><dd>They hold more power</dd></div>
             <div><dt><i className="swatch swatch-you" /></dt><dd>You hold more power</dd></div>
             <div><dt><i className="swatch swatch-even" /></dt><dd>Even</dd></div>
-            <div><dt><i className="swatch swatch-hot" /></dt><dd>Thick line: gap of 6 or more</dd></div>
+            <div><dt><i className="swatch swatch-hot" /></dt><dd>Thicker: bigger power gap</dd></div>
             <div><dt><i className="swatch swatch-cross" /></dt><dd>They know each other</dd></div>
-            <div><dt><i className="swatch-star" /></dt><dd>Bigger, brighter point: closer</dd></div>
+            <div><dt><i className="swatch-star" /></dt><dd>Brighter: closer tie</dd></div>
           </dl>
         </div>
       )}
