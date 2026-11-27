@@ -107,13 +107,13 @@ export function App() {
   );
 
   const scene = useMemo<Scene>(() => {
-    const goal = alliance.activeGoalId;
     const byId = new Map(alliance.people.map((p) => [p.id, p]));
     const spheres = new Map(alliance.spheres.map((c) => [c.id, c]));
     const alphaOf = (id: ID) => {
       if (id === alliance.me.id || id === selectedId) return 1;
+      // Only an explicit highlight fades people. The active goal never does,
+      // so brightness always means closeness.
       if (highlightIds) return highlightIds.has(id) ? 1 : 0.14;
-      if (goal) return byId.get(id)?.stances[goal] ? 1 : 0.34;
       return 1;
     };
     const nodes = new Map<ID, SceneNode>();

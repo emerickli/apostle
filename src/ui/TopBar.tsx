@@ -121,7 +121,7 @@ export function TopBar({ alliance, onAdd, onHome, onManage, files }: Props) {
             {(close) => (
               <div className="pop-list">
                 <p className="pop-head">Focus on a goal</p>
-                <p className="pop-note">People not involved in the goal fade out.</p>
+                <p className="pop-note">Sets the goal counts and who is going cold.</p>
                 <button className={`pop-row ${!activeGoal ? 'is-on' : ''}`} onClick={() => { store.setActiveGoal(null); close(); }}>
                   <span className="radio" /> No goal
                 </button>

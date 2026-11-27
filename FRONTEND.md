@@ -42,7 +42,7 @@ Changes from the brief so far:
 | Type | An Aa menu switches between Tektur with Kode Mono (default), Chakra Petch with JetBrains Mono, Oxanium with Share Tech Mono, and Saira with Martian Mono. The choice is saved on this computer. |
 | Spheres to start | New and cleared maps start with Family, Workplace, Career and Friends. |
 
-The sample loads with Raise as the active goal, so people not involved in it show faded.
+The sample loads with Raise as the active goal.
 
 ## Mood (not negotiable)
 
@@ -163,7 +163,7 @@ Keep every number in this section and the hot-link threshold in one place, so th
 
 ## Goals
 
-A goal has a name. People on that goal have a stance. One goal can be active at a time. While one is active, people outside it dim.
+A goal has a name. People on that goal have a stance. One goal can be active at a time. The active goal drives the stance counts and Going cold. It does not dim anyone on the map, because brightness means closeness.
 
 ## Import, open, save
 
