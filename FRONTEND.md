@@ -113,15 +113,17 @@ Pan and zoom the map.
 ## A person
 
 - Name
-- Picture, square, to the right of the name on grey frosted glass. Until a photo is added it shows a default avatar picked by gender: Female, Male, or Other/NA. Hovering shows Add photo; clicking or dropping an image sets one, cropped to a square. Remove photo goes back to the default
+- Picture, square, to the right of the name on grey frosted glass. Until a photo is added it shows one of three default avatars, picked from small thumbnails under the name. The first, neutral one is the default. The thumbnails hide once a photo is set. Hovering shows Add photo; clicking or dropping an image sets one, cropped to a square. Remove photo goes back to the default
 - Company, title, profile URL, connected date
 - Sphere, from a short editable list
-- Closeness, computed from the log, with a way to override it and a way to clear the override
+- Closeness, a four-step meter (Weak, Active, Close, Inner) you click to set. Until you set it, it follows the log and shows softer. Once set, the card shows what the log suggests only when it differs, with Use log to go back to automatic
 - Connection points: time together, shared interest, introduction, favor. Each has a note, a date, and a mutual flag
 - Power you hold, and power they hold
 - Leverage: one private line each way, "What you can use" and "What they can use"
 - Stance, when a goal filter is on: with you, against you, or uncommitted
-- Delete, except for you
+- Delete, except for you. Deleting a person, goal or sphere shows a message with Undo for a few seconds
+
+The card reads top to bottom in this order: name, picture and avatar choice, title and company, Place, Closeness, Power, Contact log (newest three, then Show all), Leverage, Goals, Knows, Details (profile URL and connected date), Delete. Nothing at the top repeats what a section below already shows, and empty sections say so in one line instead of showing zeros.
 
 You, the root, can be renamed. You have no power row against yourself.
 
@@ -133,7 +135,7 @@ Accent "power you hold" in red and "power they hold" in cyan.
 
 ### Closeness
 
-Computed, unless overridden. The override replaces the computed value. The node gets brighter and larger as closeness rises. You stay the brightest.
+The level you set wins. With no level set, it is computed from the log below. The node gets brighter and larger as closeness rises. You stay the brightest.
 
 Starting formula:
 

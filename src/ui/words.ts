@@ -1,6 +1,6 @@
 // Interface wording in one place. Keep it plain.
 
-import type { Band, Gender, Layout, PointKind, Source, Stance } from '../core/model';
+import type { Band, Layout, PointKind, Source, Stance } from '../core/model';
 import type { PracticeKey } from '../core/rules';
 
 export const MOTTO = 'Build your alliance. Test your allegiance.';
@@ -63,12 +63,6 @@ export const SOURCE_GROUPS: { name: string; sources: Source[] }[] = [
   { name: 'Position', sources: ['authority', 'standing', 'influence'] },
   { name: 'Ties', sources: ['debt', 'dependence', 'alternatives', 'bond'] },
 ];
-
-export const GENDER_NAMES: Record<Gender, string> = {
-  female: 'Female',
-  male: 'Male',
-  other: 'Other/NA',
-};
 
 export const STANCE_NAMES: Record<Stance, string> = {
   with: 'With you',

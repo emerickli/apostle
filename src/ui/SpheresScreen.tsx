@@ -14,9 +14,10 @@ interface Props {
   derived: Derived;
   onClose: () => void;
   onOpenPerson: (id: ID) => void;
+  onDeleted: (message: string, before: Alliance) => void;
 }
 
-export function SpheresScreen({ alliance, derived, onClose, onOpenPerson }: Props) {
+export function SpheresScreen({ alliance, derived, onClose, onOpenPerson, onDeleted }: Props) {
   const store = useStore();
   const [query, setQuery] = useState('');
   const [newName, setNewName] = useState('');
@@ -127,7 +128,12 @@ export function SpheresScreen({ alliance, derived, onClose, onOpenPerson }: Prop
                     <button
                       className={`pill ${armed === col.id ? 'is-on' : ''}`}
                       onClick={() => {
-                        if (armed === col.id) { store.deleteSphere(col.id); setArmed(null); }
+                        if (armed === col.id) {
+                          const before = store.getState();
+                          store.deleteSphere(col.id);
+                          setArmed(null);
+                          onDeleted(`${col.name} deleted. Its people now have no sphere.`, before);
+                        }
                         else setArmed(col.id);
                       }}
                       onBlur={() => setArmed(null)}

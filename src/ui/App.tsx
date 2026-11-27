@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import type { ID, Layout } from '../core/model';
+import type { Alliance, ID, Layout } from '../core/model';
 import { LAYOUTS } from '../core/model';
 import { derive } from '../core/derive';
 import { canMove, descendantIds } from '../core/tree';
@@ -68,7 +68,7 @@ export function App({ where, go, mine }: Props) {
   const [practiceOpen, setPracticeOpen] = useState(() => !window.matchMedia('(max-width: 760px)').matches);
   const [mapDrag, setMapDrag] = useState<{ id: ID; overTray: boolean } | null>(null);
   const [trayDrag, setTrayDrag] = useState<{ id: ID; x: number; y: number; valid: boolean } | null>(null);
-  const [toast, setToast] = useState<{ text: string; n: number } | null>(null);
+  const [toast, setToast] = useState<{ text: string; n: number; undo?: () => void } | null>(null);
   const [confirm, setConfirm] = useState<ConfirmSpec | null>(null);
   const [fitToken, setFitToken] = useState(0);
   const [spheresOpen, setSpheresOpen] = useState(false);
@@ -79,7 +79,16 @@ export function App({ where, go, mine }: Props) {
   // Home and Import draw no map behind them, just you at the center.
   const showHome = where.screen !== 'map';
   const setHome = (on: boolean) => go({ ...where, screen: on ? 'home' : 'map' });
-  const say = useCallback((text: string) => setToast((t) => ({ text, n: (t?.n ?? 0) + 1 })), []);
+  const say = useCallback(
+    (text: string, undo?: () => void) => setToast((t) => ({ text, undo, n: (t?.n ?? 0) + 1 })),
+    [],
+  );
+  /** After a delete: say what happened and offer to put the map back as it was. */
+  const sayDeleted = useCallback(
+    (text: string, before: Alliance, reselect?: ID) =>
+      say(text, () => { store.replace(before); if (reselect) setSelectedId(reselect); }),
+    [say, store],
+  );
   const nameOf = useCallback(
     (id: ID) => {
       const s = store.getState();
@@ -352,6 +361,7 @@ export function App({ where, go, mine }: Props) {
             files={files}
             onHome={() => { setSelectedId(null); setHighlight(null); setHome(true); }}
             onManage={() => setSpheresOpen(true)}
+            onDeleted={sayDeleted}
           />
           {charts && (
             <ChartsView alliance={alliance} derived={derived} now={now} selectedId={selectedId} onSelect={setSelectedId} />
@@ -393,7 +403,8 @@ export function App({ where, go, mine }: Props) {
               now={now}
               onClose={() => setSelectedId(null)}
               onPlace={place}
-              onDeleted={say}
+              onSay={say}
+              onDeleted={sayDeleted}
             />
           )}
         </>
@@ -405,6 +416,7 @@ export function App({ where, go, mine }: Props) {
           derived={derived}
           onClose={() => setSpheresOpen(false)}
           onOpenPerson={(id) => { setSpheresOpen(false); setSelectedId(id); }}
+          onDeleted={sayDeleted}
         />
       )}
       {trayDrag && (
@@ -413,7 +425,7 @@ export function App({ where, go, mine }: Props) {
         </div>
       )}
       {dragging && <div className="drag-hint">Drop on someone to place under them{mapDrag ? ', or on the bottom bar to take off the map' : ''}</div>}
-      {toast && <Toast key={toast.n} text={toast.text} onDone={() => setToast(null)} />}
+      {toast && <Toast key={toast.n} text={toast.text} undo={toast.undo} onDone={() => setToast(null)} />}
       {confirm && <ConfirmDialog spec={confirm} onClose={() => setConfirm(null)} />}
     </div>
   );

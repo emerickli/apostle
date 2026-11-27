@@ -2,8 +2,8 @@
 // Each future version adds one step to `steps`. Old saves pass through every step in order.
 
 import {
-  BANDS, FILE_FORMAT, FILE_VERSION, GENDERS, LAYOUTS, POINT_KINDS, SOURCES, STANCES, emptyPower,
-  type Alliance, type Band, type Sphere, type CrossTie, type Goal, type ID, type Layout, type Person,
+  BANDS, FILE_FORMAT, FILE_VERSION, AVATARS, LAYOUTS, POINT_KINDS, SOURCES, STANCES, emptyPower,
+  type Alliance, type AvatarId, type Band, type Sphere, type CrossTie, type Goal, type ID, type Layout, type Person,
   type Point, type PowerSet, type Stance,
 } from './model';
 import { newId } from './id';
@@ -29,6 +29,13 @@ function power(v: unknown): PowerSet {
     }
   }
   return out;
+}
+
+// Saves from before avatars had numbers stored a gender instead. Map it once, keep nothing else.
+const OLD_GENDER_AVATAR: Record<string, AvatarId> = { other: 1, female: 2, male: 3 };
+function avatarOf(p: Raw): AvatarId {
+  if (AVATARS.includes(p.avatar as AvatarId)) return p.avatar as AvatarId;
+  return OLD_GENDER_AVATAR[str(p.gender)] ?? 1;
 }
 
 // version -> function that upgrades a raw object from that version to the next.
@@ -81,7 +88,7 @@ function normalize(raw: Raw, now: string): Alliance {
       holdThem: str(p.holdThem),
       stances,
       // Added after version 2. Missing in older saves, so they get the neutral default.
-      gender: oneOf(p.gender, GENDERS, 'other'),
+      avatar: avatarOf(p),
       photo: typeof p.photo === 'string' && p.photo.startsWith('data:image/') ? p.photo : null,
       updatedAt: str(p.updatedAt, now),
     };

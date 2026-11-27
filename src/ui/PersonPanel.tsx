@@ -1,15 +1,15 @@
 import { useEffect, useRef, useState } from 'react';
 import {
-  BANDS, GENDERS, POINT_KINDS, SOURCES, STANCES,
-  type Alliance, type Band, type ID, type Person, type PointKind, type Source, type Stance,
+  AVATARS, BANDS, POINT_KINDS, SOURCES, STANCES,
+  type Alliance, type ID, type Person, type PointKind, type Source, type Stance,
 } from '../core/model';
 import type { Derived } from '../core/derive';
-import { computedBand, daysSince, lastPointDate, pointWeight } from '../core/rules';
+import { computedBand, daysSince, lastPointDate } from '../core/rules';
 import { descendantIds } from '../core/tree';
 import { thresholds } from '../core/thresholds';
 import { useStore } from './store-context';
-import { BAND_NAMES, GENDER_NAMES, POINT_NAMES, SOURCE_GROUPS, SOURCE_HINTS, SOURCE_NAMES, STANCE_NAMES, ago } from './words';
-import { Avatar } from './Avatar';
+import { BAND_NAMES, POINT_NAMES, SOURCE_GROUPS, SOURCE_HINTS, SOURCE_NAMES, STANCE_NAMES, ago } from './words';
+import { Avatar, DEFAULT_AVATAR } from './Avatar';
 
 interface Props {
   person: Person;
@@ -18,11 +18,16 @@ interface Props {
   now: Date;
   onClose: () => void;
   onPlace: (id: ID, parentId: ID | null) => void;
-  onDeleted: (message: string) => void;
+  onSay: (message: string) => void;
+  onDeleted: (message: string, before: Alliance, reselect?: ID) => void;
 }
 
 const TRAY = '__tray';
 const NEW = '__new';
+/** Contact log entries shown before Show all. */
+const LOG_SHOWN = 3;
+/** Closeness levels, weakest first, as the meter reads left to right. */
+const STEPS = [...BANDS].reverse();
 
 function Section({ label, aside, children }: { label: string; aside?: React.ReactNode; children: React.ReactNode }) {
   return (
@@ -57,6 +62,7 @@ function PowerMeter({ person }: { person: Person }) {
 
   return (
     <div className={`pm ${hot ? 'is-hot' : ''}`}>
+      {shown.length > 0 && <>
       <div className="pm-head">
         <div className="pm-total pm-you">
           <span className="tag tag-you">{you}</span>
@@ -73,6 +79,7 @@ function PowerMeter({ person }: { person: Person }) {
           style={{ ['--lead' as string]: `${Math.min(1, Math.abs(lead) / 18) * 50}%` }}
         />
       </div>
+      </>}
       {shown.map((s) => (
         <div className="pm-row" key={s}>
           <div className="pm-side pm-side-you">
@@ -138,11 +145,12 @@ function PowerMeter({ person }: { person: Person }) {
   );
 }
 
-export function PersonPanel({ person, alliance, derived, now, onClose, onPlace, onDeleted }: Props) {
+export function PersonPanel({ person, alliance, derived, now, onClose, onPlace, onSay, onDeleted }: Props) {
   const store = useStore();
   const nameRef = useRef<HTMLInputElement>(null);
   const [newSphere, setNewSphere] = useState<string | null>(null);
   const [armed, setArmed] = useState(false);
+  const [allPoints, setAllPoints] = useState(false);
 
   useEffect(() => {
     if (!person.name) nameRef.current?.focus();
@@ -157,7 +165,6 @@ export function PersonPanel({ person, alliance, derived, now, onClose, onPlace, 
 
   const id = person.id;
   const band = derived.bands.get(id) ?? 'weak';
-  const score = derived.scores.get(id) ?? 0;
   const auto = computedBand(person, now);
   const last = lastPointDate(person);
   const placed = derived.placed.has(id);
@@ -166,17 +173,16 @@ export function PersonPanel({ person, alliance, derived, now, onClose, onPlace, 
     .filter((p) => p.id !== id && !below.has(p.id))
     .sort((a, b) => a.name.localeCompare(b.name));
   const parentValue = person.parentId ?? TRAY;
-  const sphere = alliance.spheres.find((c) => c.id === person.sphereId);
   const ties = alliance.crossTies.filter((t) => t.a === id || t.b === id);
   const tiedIds = new Set(ties.map((t) => (t.a === id ? t.b : t.a)));
   const names = new Map(alliance.people.map((p) => [p.id, p.name || 'Unnamed']));
-  const T = thresholds.closeness;
 
   const remove = () => {
     if (!armed) { setArmed(true); return; }
     const kids = alliance.people.filter((p) => p.parentId === id).length;
+    const before = store.getState();
     store.deletePerson(id);
-    onDeleted(`${person.name || 'Unnamed'} deleted.${kids ? ` ${kids === 1 ? 'The person' : `The ${kids} people`} under them moved up a level.` : ''}`);
+    onDeleted(`${person.name || 'Unnamed'} deleted.${kids ? ` ${kids === 1 ? 'The person' : `The ${kids} people`} under them moved up a level.` : ''}`, before, id);
     onClose();
   };
 
@@ -185,10 +191,6 @@ export function PersonPanel({ person, alliance, derived, now, onClose, onPlace, 
       <div className="frame-in person-in">
         <div className="person-top">
           {!placed && <span className="tag tag-alert">Not on the map</span>}
-          <span className="tag">
-            {sphere ? sphere.name : 'No sphere'}
-          </span>
-          <span className="tag">{BAND_NAMES[band]}</span>
           <button className="icon-btn push" onClick={onClose} aria-label="Close">×</button>
         </div>
 
@@ -202,24 +204,26 @@ export function PersonPanel({ person, alliance, derived, now, onClose, onPlace, 
               aria-label="Name"
               onChange={(e) => store.updatePerson(id, { name: e.target.value })}
             />
-            <div className="seg-toggle seg-sm" role="radiogroup" aria-label="Gender">
-              {GENDERS.map((g) => (
-                <button
-                  key={g}
-                  role="radio"
-                  aria-checked={person.gender === g}
-                  className={person.gender === g ? 'is-on' : ''}
-                  onClick={() => store.updatePerson(id, { gender: g })}
-                >
-                  {GENDER_NAMES[g]}
-                </button>
-              ))}
-            </div>
-            {person.photo && (
+            {person.photo ? (
               <button className="link-btn quiet-link" onClick={() => store.updatePerson(id, { photo: null })}>Remove photo</button>
+            ) : (
+              <div className="avatar-pick" role="radiogroup" aria-label="Picture">
+                {AVATARS.map((n) => (
+                  <button
+                    key={n}
+                    role="radio"
+                    aria-checked={person.avatar === n}
+                    aria-label={`Picture ${n}`}
+                    className={person.avatar === n ? 'is-on' : ''}
+                    onClick={() => store.updatePerson(id, { avatar: n })}
+                  >
+                    <img src={DEFAULT_AVATAR[n]} alt="" draggable={false} />
+                  </button>
+                ))}
+              </div>
             )}
           </div>
-          <Avatar person={person} onError={onDeleted} />
+          <Avatar person={person} onError={onSay} />
         </div>
         <div className="grid-2">
           <label className="lbl">
@@ -229,24 +233,6 @@ export function PersonPanel({ person, alliance, derived, now, onClose, onPlace, 
           <label className="lbl">
             <span>Company</span>
             <input className="field" value={person.company} onChange={(e) => store.updatePerson(id, { company: e.target.value })} />
-          </label>
-          <label className="lbl">
-            <span>
-              Profile URL
-              {person.url && /^https?:\/\//.test(person.url) && (
-                <a className="lbl-link" href={person.url} target="_blank" rel="noreferrer noopener">Open</a>
-              )}
-            </span>
-            <input className="field" value={person.url} inputMode="url" onChange={(e) => store.updatePerson(id, { url: e.target.value })} />
-          </label>
-          <label className="lbl">
-            <span>Connected</span>
-            <input
-              className="field"
-              type="date"
-              value={person.connectedOn ?? ''}
-              onChange={(e) => store.updatePerson(id, { connectedOn: e.target.value || null })}
-            />
           </label>
         </div>
 
@@ -307,42 +293,47 @@ export function PersonPanel({ person, alliance, derived, now, onClose, onPlace, 
           </div>
         </Section>
 
-        <Section label="Closeness" aside={<span className="num">{score.toFixed(1)} / {T.cap}</span>}>
+        <Section label="Closeness">
           <div className="cl">
-            <div className="cl-band">{BAND_NAMES[band]}</div>
-            <div className="cl-meter" aria-hidden>
-              <span className="cl-fill" style={{ width: `${(score / T.cap) * 100}%` }} />
-              {[T.bands.active, T.bands.close, T.bands.inner].map((v) => (
-                <i key={v} className="cl-tick" style={{ left: `${(v / T.cap) * 100}%` }} />
+            {/* The level is the truth; the map uses it. Click a step to set it. */}
+            <div className={`cl-steps ${person.closenessOverride ? 'is-set' : 'is-auto'}`} role="radiogroup" aria-label="Closeness">
+              {STEPS.map((b, i) => (
+                <button
+                  key={b}
+                  role="radio"
+                  aria-checked={band === b}
+                  className={`cl-step ${i <= STEPS.indexOf(band) ? 'is-filled' : ''} ${band === b ? 'is-current' : ''}`}
+                  onClick={() => store.setOverride(id, b)}
+                >
+                  <i />
+                  <span>{BAND_NAMES[b]}</span>
+                </button>
               ))}
             </div>
-            <label className="lbl lbl-row">
-              <span>Level</span>
-              <select
-                className="field"
-                value={person.closenessOverride ?? ''}
-                onChange={(e) => store.setOverride(id, (e.target.value || null) as Band | null)}
-              >
-                <option value="">Automatic ({BAND_NAMES[auto]})</option>
-                {BANDS.map((b) => (
-                  <option key={b} value={b}>{BAND_NAMES[b]}</option>
-                ))}
-              </select>
-            </label>
-            <p className="note">
-              {last ? `Last contact ${ago(daysSince(last, now))}.` : 'Nothing logged yet.'}
-            </p>
+            {!person.closenessOverride && <p className="note">Automatic, from your contact log. Click a level to set it yourself.</p>}
+            {person.closenessOverride && person.closenessOverride !== auto && (
+              <p className="note">
+                Your log suggests {BAND_NAMES[auto]}.{' '}
+                <button className="link-btn" onClick={() => store.setOverride(id, null)}>Use log</button>
+              </p>
+            )}
+            {last && <p className="note">Last contact {ago(daysSince(last, now))}.</p>}
           </div>
+        </Section>
+
+        <Section label="Power">
+          <PowerMeter person={person} />
         </Section>
 
         <Section
           label="Contact log"
           aside={<button className="hud-btn hud-btn-sm" onClick={() => store.addPoint(id)}>Add</button>}
         >
-          {person.points.length === 0 && <p className="note">Log time together, shared interests, introductions and favors. Recent and mutual ones count more.</p>}
+          {person.points.length === 0 && <p className="note">Nothing logged yet. Recent and mutual contact counts more.</p>}
           <ul className="points">
             {[...person.points]
               .sort((a, b) => (a.date < b.date ? 1 : -1))
+              .slice(0, allPoints ? undefined : LOG_SHOWN)
               .map((pt) => (
                 <li key={pt.id} className="point">
                   <div className="point-row">
@@ -372,22 +363,20 @@ export function PersonPanel({ person, alliance, derived, now, onClose, onPlace, 
                     </button>
                     <button className="icon-btn" aria-label="Remove point" onClick={() => store.removePoint(id, pt.id)}>×</button>
                   </div>
-                  <div className="point-note">
-                    <input
-                      className="field field-note"
-                      placeholder="Note"
-                      value={pt.note}
-                      onChange={(e) => store.updatePoint(id, pt.id, { note: e.target.value })}
-                    />
-                    <span className="num num-dim" title="What this point adds to closeness">+{pointWeight(pt, now).toFixed(2)}</span>
-                  </div>
+                  <input
+                    className="field field-note"
+                    placeholder="Note"
+                    value={pt.note}
+                    onChange={(e) => store.updatePoint(id, pt.id, { note: e.target.value })}
+                  />
                 </li>
               ))}
           </ul>
-        </Section>
-
-        <Section label="Power">
-          <PowerMeter person={person} />
+          {person.points.length > LOG_SHOWN && (
+            <button className="link-btn quiet-link log-more" onClick={() => setAllPoints(!allPoints)}>
+              {allPoints ? 'Show fewer' : `Show all ${person.points.length}`}
+            </button>
+          )}
         </Section>
 
         <Section label="Leverage" aside={<span className="hud-label hud-label-dim">Private</span>}>
@@ -456,9 +445,29 @@ export function PersonPanel({ person, alliance, derived, now, onClose, onPlace, 
                 ))}
             </select>
           </div>
-          {ties.length > 0 && !alliance.showCrossTies && (
-            <p className="note">Turn on Who knows who at the top to see these lines.</p>
-          )}
+        </Section>
+
+        <Section label="Details">
+          <div className="grid-2">
+            <label className="lbl">
+              <span>
+                Profile URL
+                {person.url && /^https?:\/\//.test(person.url) && (
+                  <a className="lbl-link" href={person.url} target="_blank" rel="noreferrer noopener">Open</a>
+                )}
+              </span>
+              <input className="field" value={person.url} inputMode="url" onChange={(e) => store.updatePerson(id, { url: e.target.value })} />
+            </label>
+            <label className="lbl">
+              <span>Connected</span>
+              <input
+                className="field"
+                type="date"
+                value={person.connectedOn ?? ''}
+                onChange={(e) => store.updatePerson(id, { connectedOn: e.target.value || null })}
+              />
+            </label>
+          </div>
         </Section>
 
         <div className="danger">

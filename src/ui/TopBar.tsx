@@ -13,6 +13,7 @@ interface Props {
   onAdd: () => void;
   onHome: () => void;
   onManage: () => void;
+  onDeleted: (message: string, before: Alliance) => void;
   files: { download: () => void; open: () => void; importConnections: () => void; clear: () => void };
 }
 
@@ -78,7 +79,7 @@ function SphereBar({ alliance, onManage }: { alliance: Alliance; onManage: () =>
   );
 }
 
-export function TopBar({ sample, alliance, onAdd, onHome, onManage, files }: Props) {
+export function TopBar({ sample, alliance, onAdd, onHome, onManage, onDeleted, files }: Props) {
   const [fontSet, setFontSet] = useState<FontSetId>(currentFontSet());
   const store = useStore();
   const activeGoal = alliance.goals.find((g) => g.id === alliance.activeGoalId);
@@ -144,7 +145,7 @@ export function TopBar({ sample, alliance, onAdd, onHome, onManage, files }: Pro
                       aria-label="Goal name"
                       onChange={(e) => store.renameGoal(g.id, e.target.value)}
                     />
-                    <button className="icon-btn" aria-label={`Delete goal ${g.name}`} onClick={() => store.deleteGoal(g.id)}>×</button>
+                    <button className="icon-btn" aria-label={`Delete goal ${g.name}`} onClick={() => { const before = store.getState(); store.deleteGoal(g.id); onDeleted(`Goal ${g.name || 'Goal'} deleted.`, before); }}>×</button>
                   </div>
                 ))}
                 <NewItem placeholder="New goal" onAdd={(name) => store.addGoal(name)} />

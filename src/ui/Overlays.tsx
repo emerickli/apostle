@@ -7,16 +7,21 @@ export interface ConfirmSpec {
   onConfirm: () => void;
 }
 
-export function Toast({ text, onDone }: { text: string; onDone: () => void }) {
+/** A message that fades on its own. With `undo`, it stays longer and offers an Undo button. */
+export function Toast({ text, undo, onDone }: { text: string; undo?: () => void; onDone: () => void }) {
   const done = useRef(onDone);
   done.current = onDone;
+  const ms = undo ? 8000 : 4200;
   useEffect(() => {
-    const t = setTimeout(() => done.current(), 4200);
+    const t = setTimeout(() => done.current(), ms);
     return () => clearTimeout(t);
-  }, []);
+  }, [ms]);
   return (
-    <div className="toast" role="status">
-      {text}
+    <div className={`toast ${undo ? 'has-undo' : ''}`} role="status" style={{ animationDuration: `${ms}ms` }}>
+      <span>{text}</span>
+      {undo && (
+        <button className="toast-undo" onClick={() => { undo(); done.current(); }}>Undo</button>
+      )}
     </div>
   );
 }

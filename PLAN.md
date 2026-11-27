@@ -43,7 +43,7 @@ Power stays readable in that neon: cyan when they hold more, red when you hold m
 
 ## A tie
 
-**Closeness** changes the node. It comes from a log: time together, shared interests, who introduced you, favors, and how recent and mutual it is. You can override it. An empty log is a weak tie.
+**Closeness** changes the node. It is a level you set: weak, active, close or inner. Your own judgment comes first, because most real contact happens over email, Slack, texts, calls and in person, where Apostle cannot see it. Until you set a level, it follows the contact log: time together, shared interests, who introduced you, favors, and how recent and mutual it is. Once you set one, the log only suggests, and the card says when the two disagree. An empty log with no level set is a weak tie.
 
 **Power** is separate from closeness. It runs both ways, and each side is a set of sources:
 
@@ -148,6 +148,7 @@ These are choices to make now so the app is cheaper later. None of them means bu
 ## Later
 
 - Desktop app
+- Contact importers that feed the log, all read on this computer: LinkedIn messages (the messages file in the LinkedIn download), a calendar export (.ics, meetings by attendee), and email exports (message counts per address). Slack exports are mostly limited to workspace admins, so they come last. Imports suggest closeness and drive Going cold; they never overwrite a level you set
 - Phone app
 - Private sync across devices
 - Agents that summarize and organize what you already wrote
