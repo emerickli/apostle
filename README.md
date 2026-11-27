@@ -6,6 +6,8 @@ A private map of one person's professional circle.
 - [Front end](FRONTEND.md)
 - [Data module](docs/DATA.md)
 
+Live prototype: https://emerickli.github.io/apostle/ (rebuilt on every push to `main`).
+
 ## Run it
 
 You need Node 20 or newer.

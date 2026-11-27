@@ -38,7 +38,7 @@ export function buildSample(now = new Date()): Alliance {
       pt('favor', 210, 'I reviewed a deck for one of her companies'),
     ],
     powerYou: pw({ access: 1, debt: 1, information: 1, alternatives: 1 }),
-    powerThem: pw({ access: 3, dependence: 1, information: 2, alternatives: 1, standing: 2 }),
+    powerThem: pw({ access: 2, money: 3, information: 2, standing: 2 }),
     holdYou: 'She wants first look at the seed round.',
     holdThem: 'She knows how short the runway is.',
     stances: { [raise.id]: 'with' },
@@ -52,8 +52,8 @@ export function buildSample(now = new Date()): Alliance {
       pt('interest', 44, 'Same climbing gym'),
       pt('time', 150, 'Offsite in Lisbon', true),
     ],
-    powerYou: pw({ access: 2, dependence: 2, debt: 1, information: 1, alternatives: 1, standing: 1 }),
-    powerThem: pw({ access: 2, dependence: 1, debt: 1, information: 1, standing: 1 }),
+    powerYou: pw({ authority: 2, opportunity: 2, dependence: 2, debt: 1, information: 1 }),
+    powerThem: pw({ expertise: 3, information: 2, debt: 1 }),
     holdYou: 'His equity vests next spring.',
     holdThem: 'He is the only one who knows the billing code.',
     stances: { [raise.id]: 'with' },
@@ -68,7 +68,7 @@ export function buildSample(now = new Date()): Alliance {
       pt('favor', 300, 'She reviewed the hiring plan'),
     ],
     powerYou: pw({ access: 2, debt: 1, information: 1, standing: 1 }),
-    powerThem: pw({ access: 1, information: 2, standing: 1 }),
+    powerThem: pw({ access: 1, expertise: 2, standing: 1 }),
     stances: { [raise.id]: 'uncommitted' },
   });
   const naomi = person({
@@ -80,20 +80,20 @@ export function buildSample(now = new Date()): Alliance {
       pt('interest', 200, 'Both on the founder mentoring list'),
     ],
     powerYou: pw({ access: 2, information: 2, alternatives: 1, standing: 1 }),
-    powerThem: pw({ access: 2, standing: 2 }),
+    powerThem: pw({ access: 2, influence: 2 }),
   });
   const chris = person({
     name: 'Chris Adelayo', company: 'The Ledger Wire', title: 'Reporter', sphereId: community.id,
     connectedOn: ago(500),
     points: [pt('interest', 410, 'Quoted me in a piece on hardware startups')],
     powerYou: pw({ access: 1 }),
-    powerThem: pw({ information: 1 }),
+    powerThem: pw({ influence: 1 }),
   });
   const jonah = person({
     name: 'Jonah Peck', company: 'Halcyon Ventures', title: 'Managing director', sphereId: career.id,
     parentId: mira.id, connectedOn: ago(40),
     points: [pt('intro', 40, 'Mira brought him to the demo')],
-    powerThem: pw({ access: 3, dependence: 2, information: 2, alternatives: 3, standing: 3 }),
+    powerThem: pw({ money: 3, authority: 3, access: 3, alternatives: 2, standing: 2 }),
     holdThem: 'He can tell Mira to pass.',
   });
   const sofia = person({
@@ -103,8 +103,8 @@ export function buildSample(now = new Date()): Alliance {
       pt('time', 15, 'Design review'),
       pt('interest', 70, 'Both obsessed with type', true),
     ],
-    powerYou: pw({ access: 3, dependence: 2, debt: 3, information: 1, alternatives: 2, standing: 1 }),
-    powerThem: pw({ access: 1, information: 1, standing: 1 }),
+    powerYou: pw({ authority: 3, opportunity: 2, debt: 3, dependence: 2, standing: 2 }),
+    powerThem: pw({ expertise: 2, information: 1 }),
     holdYou: 'I wrote the reference that got her the visa.',
   });
   const ruth = person({
@@ -116,7 +116,7 @@ export function buildSample(now = new Date()): Alliance {
       pt('favor', 150, 'Sent her a candidate for her portfolio'),
     ],
     powerYou: pw({ access: 1, information: 1 }),
-    powerThem: pw({ information: 1 }),
+    powerThem: pw({ money: 1 }),
     stances: { [raise.id]: 'against' },
   });
   const leo = person({
@@ -129,8 +129,8 @@ export function buildSample(now = new Date()): Alliance {
       pt('interest', 60, 'Motorbike trip', true),
       pt('time', 100, 'Family reunion', true),
     ],
-    powerYou: pw({ access: 1, debt: 1 }),
-    powerThem: pw({ access: 1, debt: 2, standing: 1 }),
+    powerYou: pw({ bond: 1, debt: 1 }),
+    powerThem: pw({ bond: 2, debt: 2 }),
     holdThem: 'He knows how much I put into the company.',
   });
   const nora = person({
@@ -141,8 +141,8 @@ export function buildSample(now = new Date()): Alliance {
       pt('favor', 40, 'She watched the dog for a week', true),
       pt('interest', 95, 'Half marathon together', true),
     ],
-    powerYou: pw({ debt: 1 }),
-    powerThem: pw({ debt: 1, information: 1 }),
+    powerYou: pw({ bond: 1 }),
+    powerThem: pw({ bond: 1, debt: 1 }),
   });
   const priya = person({
     name: 'Priya Nair', company: 'Northgate', title: 'Product lead', sphereId: friends.id,
@@ -159,7 +159,7 @@ export function buildSample(now = new Date()): Alliance {
     connectedOn: ago(700),
     points: [pt('time', 200, 'Met at Priya\'s birthday')],
     powerYou: pw({ access: 1, information: 1, standing: 1 }),
-    powerThem: pw({ information: 1 }),
+    powerThem: pw({ expertise: 1 }),
   });
   const evan = person({
     name: 'Evan Cho', parentId: null, url: 'https://linkedin.example/in/evan-cho',

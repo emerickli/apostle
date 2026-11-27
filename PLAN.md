@@ -47,12 +47,12 @@ Power stays readable in that neon: cyan when they hold more, red when you hold m
 
 **Power** is separate from closeness. It runs both ways, and each side is a set of sources:
 
-- Access
-- Dependence
-- Debt
-- Information
-- Alternatives
-- Standing
+- Resources: access, money, opportunities
+- Know-how: information, expertise
+- Position: authority, standing, influence
+- Ties: debt, reliance, alternatives, loyalty
+
+A person's card lists only the sources that apply to them, so the longer list adds no clutter.
 
 A number, if shown, is only the sum of those sources.
 

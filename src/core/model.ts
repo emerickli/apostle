@@ -21,7 +21,16 @@ export const STANCES: readonly Stance[] = ['with', 'against', 'uncommitted'];
 export type Layout = 'tree' | 'radial' | 'rings' | 'charts';
 export const LAYOUTS: readonly Layout[] = ['tree', 'radial', 'rings', 'charts'];
 
-export const SOURCES = ['access', 'dependence', 'debt', 'information', 'alternatives', 'standing'] as const;
+/**
+ * Where power comes from. Ids are stable; the interface names live in ui/words.ts.
+ * The first six were the original set, so older saves keep their scores.
+ */
+export const SOURCES = [
+  'access', 'money', 'opportunity',
+  'information', 'expertise',
+  'authority', 'standing', 'influence',
+  'debt', 'dependence', 'alternatives', 'bond',
+] as const;
 export type Source = (typeof SOURCES)[number];
 /** Each source scored 0 to 3. */
 export type PowerSet = Record<Source, number>;
@@ -102,5 +111,5 @@ export interface Alliance {
 export const NO_SPHERE = 'none';
 
 export function emptyPower(): PowerSet {
-  return { access: 0, dependence: 0, debt: 0, information: 0, alternatives: 0, standing: 0 };
+  return Object.fromEntries(SOURCES.map((s) => [s, 0])) as PowerSet;
 }

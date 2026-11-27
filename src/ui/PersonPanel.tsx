@@ -8,7 +8,7 @@ import { computedBand, daysSince, lastPointDate, pointWeight } from '../core/rul
 import { descendantIds } from '../core/tree';
 import { thresholds } from '../core/thresholds';
 import { useStore } from './store-context';
-import { BAND_NAMES, POINT_NAMES, SOURCE_NAMES, STANCE_NAMES, ago } from './words';
+import { BAND_NAMES, POINT_NAMES, SOURCE_GROUPS, SOURCE_HINTS, SOURCE_NAMES, STANCE_NAMES, ago } from './words';
 
 interface Props {
   person: Person;
@@ -38,36 +38,41 @@ function Section({ label, aside, children }: { label: string; aside?: React.Reac
 
 function PowerMeter({ person }: { person: Person }) {
   const store = useStore();
+  // Rows show only for sources in use, plus any added while this card is open.
+  const [added, setAdded] = useState<Source[]>([]);
+  const [picking, setPicking] = useState(false);
   const you = SOURCES.reduce((n, s) => n + person.powerYou[s], 0);
   const them = SOURCES.reduce((n, s) => n + person.powerThem[s], 0);
   const lead = you - them;
   const hot = Math.abs(lead) >= thresholds.power.hotGap;
-  const max = SOURCES.length * 3;
+  const shown = SOURCES.filter((s) => person.powerYou[s] || person.powerThem[s] || added.includes(s));
   const set = (side: 'you' | 'them', s: Source, current: number, i: number) =>
     store.setPower(person.id, side, s, current === i ? i - 1 : i);
-
-  const status =
-    lead > 0 ? `You lead by ${lead}.` : lead < 0 ? `They lead by ${-lead}.` : 'Even.';
+  const remove = (s: Source) => {
+    store.setPower(person.id, 'you', s, 0);
+    store.setPower(person.id, 'them', s, 0);
+    setAdded((a) => a.filter((x) => x !== s));
+  };
 
   return (
     <div className={`pm ${hot ? 'is-hot' : ''}`}>
       <div className="pm-head">
         <div className="pm-total pm-you">
           <span className="tag tag-you">{you}</span>
-          <span className="hud-label">Power you hold</span>
+          <span className="hud-label">You hold</span>
         </div>
         <div className="pm-total pm-them">
-          <span className="hud-label">Power they hold</span>
+          <span className="hud-label">They hold</span>
           <span className="tag tag-them">{them}</span>
         </div>
       </div>
       <div className="pm-balance" aria-hidden>
         <span
           className={`pm-bar ${lead > 0 ? 'is-you' : lead < 0 ? 'is-them' : 'is-even'}`}
-          style={{ ['--lead' as string]: `${(Math.abs(lead) / max) * 50}%` }}
+          style={{ ['--lead' as string]: `${Math.min(1, Math.abs(lead) / 18) * 50}%` }}
         />
       </div>
-      {SOURCES.map((s) => (
+      {shown.map((s) => (
         <div className="pm-row" key={s}>
           <div className="pm-side pm-side-you">
             {[3, 2, 1].map((i) => (
@@ -79,7 +84,10 @@ function PowerMeter({ person }: { person: Person }) {
               />
             ))}
           </div>
-          <span className="pm-label">{SOURCE_NAMES[s]}</span>
+          <span className="pm-label" title={SOURCE_HINTS[s]}>
+            {SOURCE_NAMES[s]}
+            <button className="pm-remove" aria-label={`Remove ${SOURCE_NAMES[s]}`} onClick={() => remove(s)}>×</button>
+          </span>
           <div className="pm-side pm-side-them">
             {[1, 2, 3].map((i) => (
               <button
@@ -92,10 +100,39 @@ function PowerMeter({ person }: { person: Person }) {
           </div>
         </div>
       ))}
-      <p className="pm-status">
-        {status}
-        {hot && ' Big gap.'}
-      </p>
+      {shown.length === 0 && <p className="note">No power logged yet.</p>}
+      {shown.length > 0 && (
+        <p className="pm-status">
+          {lead > 0 ? `You lead by ${lead}.` : lead < 0 ? `They lead by ${-lead}.` : 'Even.'}
+          {hot && ' Big gap.'}
+        </p>
+      )}
+      <button className="hud-btn hud-btn-sm pm-add" aria-expanded={picking} onClick={() => setPicking(!picking)}>
+        {picking ? 'Done' : 'Add a source'}
+      </button>
+      {picking && (
+        <div className="pm-pick">
+          {SOURCE_GROUPS.map((g) => (
+            <div key={g.name} className="pm-group">
+              <span className="pm-group-name">{g.name}</span>
+              {g.sources.map((s) => {
+                const on = shown.includes(s);
+                return (
+                  <button
+                    key={s}
+                    className={`pm-option ${on ? 'is-on' : ''}`}
+                    disabled={on}
+                    onClick={() => { setAdded((a) => [...a, s]); setPicking(false); }}
+                  >
+                    <b>{SOURCE_NAMES[s]}</b>
+                    <span>{SOURCE_HINTS[s]}</span>
+                  </button>
+                );
+              })}
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 }

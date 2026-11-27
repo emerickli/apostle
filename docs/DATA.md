@@ -64,6 +64,8 @@ Version 2 adds a Family sphere to any version 1 save that has none. It runs once
 
 The fourth layout is `charts`. Saves that say `graph` open as `charts`.
 
+Power sources are listed in `SOURCES` in `model.ts`. Adding a source needs no version bump: missing scores read as 0. The id `dependence` is shown as Reliance and `bond` as Loyalty.
+
 To change the shape, raise `FILE_VERSION` in `model.ts` and add a step to `steps` in `migrate.ts` that upgrades the previous version. Files from a newer version are refused with a message rather than read badly.
 
 ## For Cursor to harden

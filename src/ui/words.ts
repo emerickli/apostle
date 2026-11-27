@@ -28,12 +28,41 @@ export const POINT_NAMES: Record<PointKind, string> = {
 
 export const SOURCE_NAMES: Record<Source, string> = {
   access: 'Access',
-  dependence: 'Dependence',
-  debt: 'Debt',
+  money: 'Money',
+  opportunity: 'Opportunities',
   information: 'Information',
-  alternatives: 'Alternatives',
+  expertise: 'Expertise',
+  authority: 'Authority',
   standing: 'Standing',
+  influence: 'Influence',
+  debt: 'Debt',
+  dependence: 'Reliance',
+  alternatives: 'Alternatives',
+  bond: 'Loyalty',
 };
+
+/** What each source means, for whoever holds it. */
+export const SOURCE_HINTS: Record<Source, string> = {
+  access: 'Can open doors and reach people',
+  money: 'Controls funding, pay or spending',
+  opportunity: 'Can offer jobs, deals or roles',
+  information: 'Knows things the other needs',
+  expertise: 'Has skills that are hard to replace',
+  authority: 'Has formal say, like a boss or a board',
+  standing: 'Reputation and status others respect',
+  influence: 'Can sway what others think',
+  debt: 'Is owed a favor',
+  dependence: 'The other relies on them day to day',
+  alternatives: 'Has other options if this tie ends',
+  bond: 'The other feels loyal or attached to them',
+};
+
+export const SOURCE_GROUPS: { name: string; sources: Source[] }[] = [
+  { name: 'Resources', sources: ['access', 'money', 'opportunity'] },
+  { name: 'Know-how', sources: ['information', 'expertise'] },
+  { name: 'Position', sources: ['authority', 'standing', 'influence'] },
+  { name: 'Ties', sources: ['debt', 'dependence', 'alternatives', 'bond'] },
+];
 
 export const STANCE_NAMES: Record<Stance, string> = {
   with: 'With you',

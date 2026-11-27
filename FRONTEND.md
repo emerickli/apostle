@@ -125,7 +125,7 @@ You, the root, can be renamed. You have no power row against yourself.
 
 ### Power
 
-Six sources, each scored 0 to 3, in both directions: access, dependence, debt, information, alternatives, standing. Show each sum. The link color compares the sums. A lead of 6 or more is a hot link.
+Twelve sources in four groups, each scored 0 to 3, in both directions. Resources: access, money, opportunities. Know-how: information, expertise. Position: authority, standing, influence. Ties: debt, reliance, alternatives, loyalty. A card shows only the sources in use for that person; Add a source opens the grouped list with a one-line meaning for each. Show each sum. The link color compares the sums. A lead of 6 or more is a hot link.
 
 Accent "power you hold" in red and "power they hold" in cyan.
 
